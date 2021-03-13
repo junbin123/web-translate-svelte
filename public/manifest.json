@@ -12,7 +12,7 @@
   "browser_action": {
     "default_icon": "images/logo48.png",
     "default_title": "一款网页翻译插件",
-    "default_popup": "index.html"
+    "default_popup": "popup.html"
   },
   "content_scripts": [
     {

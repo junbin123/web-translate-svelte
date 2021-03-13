@@ -1,8 +1,1 @@
-
-(function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':35731/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(window.document);
-(function () {
-	'use strict';
-
-	console.log('我是 background.js');
-
-}());
+!function(){"use strict";console.log("我是 background.js"),chrome.tabs.onActivated.addListener((o=>{console.log("tab:",o),chrome.tabs.get(o.tabId,(o=>{console.log("currentTab:",o),/^http/g.test(o.url)&&chrome.tabs.executeScript(null,{code:"console.log('1')"},(()=>{console.log("2")}))}))}))}();
