@@ -1,4 +1,6 @@
 /node_modules/
-/public/build/
+/public/background/
+/public/content/
+/public/popup/
 
 .DS_Store
