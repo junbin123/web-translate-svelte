@@ -8,6 +8,7 @@
 </main>
 
 <style>
+  
   .content-class {
     display: inline-block;
     color: rgba(0, 0, 0, 0);

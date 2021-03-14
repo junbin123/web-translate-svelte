@@ -1,4 +1,6 @@
 <script>
+  import Popup from './components/main/Popup.svelte'
+  import TranlatePop from './components/main/TranslatePop.svelte'
   // import LangSelect from './components/LangSelect.svelte'
   // import { targetLang, sourceLang } from './store/index.js'
   // import { onMount } from 'svelte'
@@ -134,7 +136,8 @@
 </script>
 
 <main>
-  <div class="logo" />
+  <Popup />
+  <TranlatePop />
   <!-- <img src="images/logo.png" alt="logo" id="logo-img" />
   <div id="select-box" class="flex-between">
     <LangSelect
@@ -159,20 +162,11 @@
   <button class="btn-box btn-two color-gray bg-color-gray" on:click={handleCancel}>不翻译了</button> -->
 </main>
 
-<style lang="scss" scoped>
+<style lang="scss">
+  @import '../styles/iconfont.css';
+  @import '../styles/common.css';
   main {
-    width: 280px;
-    min-height: 280px;
-    background: #fafafa;
-    margin: 0;
-    padding: 0px;
-    box-sizing: border-box;
     position: relative;
-    .logo {
-      height: 100px;
-      width: 100px;
-      background: green;
-    }
   }
   /* #logo-img {
     width: 120px;
