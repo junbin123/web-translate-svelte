@@ -128,7 +128,8 @@
 }
 
 .padding-lr-8 {
-  padding: 0 8px;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 .padding-lr-16 {
   padding-left: 16px;
@@ -139,8 +140,10 @@
   padding-bottom: 8px;
 }
 .padding-tb-16 {
-  padding: 16px 0;
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
+
 .round-none {
   border-radius: 0px;
 }

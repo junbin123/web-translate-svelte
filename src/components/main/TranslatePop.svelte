@@ -1,6 +1,15 @@
 <script>
   import { onMount } from 'svelte'
   import FormSelect from '../FormSelect.svelte'
+  import Toast from '../Basics/Toast.svelte'
+  import ClipboardJS from '../../utils/clipboard.js'
+  const clipboard = new ClipboardJS('.icon-copy', {
+    text: () => targetText
+  })
+  clipboard.on('success', e => {
+    window.showToast('已复制译文')
+  })
+
   const langList = [
     {
       name: '中文',
@@ -22,29 +31,79 @@
   let leftShowList = false
   let rightShowList = false
 
-  let isPin = true
-  let name = 'jjj'
+  const serviceDict = {
+    google: {
+      name: '谷歌翻译',
+      src: './images/logo/google-logo.png',
+      url: 'https://translate.google.cn/'
+      // https://translate.google.cn/?sl=en&tl=zh-CN&text=hello&op=translate
+    },
+    youdao: {
+      name: '有道翻译',
+      src: './images/logo/youdao-logo.png',
+      url: 'http://fanyi.youdao.com/'
+    },
+    baidu: {
+      name: '百度翻译',
+      src: './images/logo/baidu-logo.png',
+      url: 'https://fanyi.baidu.com/'
+      // https://fanyi.baidu.com/#en/zh/hello
+    },
+    caiyun: {
+      name: '彩云小译',
+      src: './images/logo/caiyun-logo.png',
+      url: 'https://fanyi.caiyunapp.com/#/'
+    },
+    deepl: {
+      name: 'DeepL 翻译',
+      src: './images/logo/deepl-logo.png',
+      url: 'https://www.deepl.com/translator'
+      // https://www.deepl.com/translator#en/zh/hello
+    }
+  }
+  let transService = 'google' // 使用的翻译服务
+
+  let sourceText = '要翻译的原文'
+  let targetText = '翻译好赛盖饭的'
+
+  let isPin = false
+  let isShow = true
+
   let boxStyle = {
     position: 'fixed',
-    top: 8 + 'px',
+    top: 20 + 'px',
     left: 8 + 'px'
   }
-  const pinClass = 'iconfont icon-push-pin hover-transition icon-push-is-pin'
-  const noPinClass = 'iconfont icon-push-pin hover-transition'
-  function handlePinClick() {}
-  function handleClose() {}
+  // 图钉icon点击事件
+  function handlePinClick() {
+    isPin = !isPin
+  }
+  // 关闭icon点击事件
+  function handleClose() {
+    isShow = false
+    // setTimeout(() => {
+    //   isShow = true
+    // }, 3000)
+  }
+  // 复制点击事件
+  function handleCopy() {}
+  // 跳转网页点击
+  function handleOpenWeb() {
+    window.open('http://fanyi.youdao.com/', '_blank')
+  }
+  // 左边选择器点击
   function handleLeftClick(e) {
     rightShowList = false
-    console.log(e)
   }
+  // 右边选择器点击
   function handleRightClick(e) {
     leftShowList = false
-    console.log(e)
   }
-  function handleSelectChange(e) {
+  // 翻译语言切换
+  function handleSelectChange() {
     console.log({ sourceLang, targetLang })
   }
-  // 组件点击
+  // 组件点击事件
   function handleBoxClick() {
     leftShowList = false
     rightShowList = false
@@ -55,48 +114,60 @@
 </script>
 
 <main>
-  <div class="select-trans-pop color-main" class:select-trans-pop-pin={isPin} style={boxStyle} on:click={handleBoxClick}>
-    <div class="trans-bar font-size-12 color-main flex-between padding-lr-16">
-      <div class="trans-bar-left flex-between hover-color-orange">
-        <i class="iconfont icon-setting font-size-16" />
-        <span class="trans-bar-left-name">设置</span>
-        <i class="iconfont icon-arrow-right" />
+  <Toast />
+  {#if isShow}
+    <div class="select-trans-pop color-main" class:select-trans-pop-pin={isPin} style={boxStyle} on:click={handleBoxClick}>
+      <div class="trans-bar font-size-12 color-main flex-between padding-lr-16">
+        <div class="trans-bar-left flex-between hover-color-orange">
+          <i class="iconfont icon-setting font-size-16" />
+          <span class="trans-bar-left-name">设置</span>
+          <i class="iconfont icon-arrow-right" />
+        </div>
+        <div id="trans-bar-middle" />
+        <div class="trans-bar-right flex">
+          <span class="iconfont icon-push-pin padding-lr-8 hover-color-orange" class:icon-push-is-pin={isPin} on:click={handlePinClick} />
+          <span class="iconfont icon-close hover-color-orange" on:click={handleClose} />
+        </div>
       </div>
-      <div id="trans-bar-middle" />
-      <div class="trans-bar-right flex">
-        <span class="iconfont icon-push-pin padding-lr-8 hover-color-orange" class:icon-push-is-pin={isPin} on:click={handlePinClick} />
-        <span class="iconfont icon-close hover-color-orange" on:click={handleClose} />
+      <div class="trans-lang flex-between padding-lr-16">
+        <FormSelect
+          on:handleClick={handleLeftClick}
+          options={langList}
+          on:handleChange={handleSelectChange}
+          bind:value={sourceLang}
+          bind:this={leftSelect}
+          bind:showList={leftShowList}
+        />
+        <i class="trans-lang-middle iconfont icon-arrow-compare flex-center hover-color-orange" />
+        <FormSelect
+          on:handleClick={handleRightClick}
+          options={langList}
+          on:handleChange={handleSelectChange}
+          bind:value={targetLang}
+          bind:this={rightSelect}
+          bind:showList={rightShowList}
+        />
+      </div>
+      <div class="padding-lr-16 padding-tb-8">
+        <span class="color-99 font-size-10 leading-8">原文</span>
+        <div class="font-size-14 color-33">{sourceText}</div>
+      </div>
+      <div class="trans-target padding-lr-16">
+        <span class="color-99 font-size-10 leading-8">译文</span>
+        <div class="font-size-14">{targetText}</div>
+        <div class="trans-footer flex-between">
+          <div class="font-size-12 color-66 transition-300 flex" on:click={handleOpenWeb}>
+            <img src={serviceDict[transService].src} width="16" height="16" alt={transService} />
+            <span>{serviceDict[transService].name}</span>
+          </div>
+          <div>
+            <span class="iconfont icon-copy padding-lr-8 hover-color-orange" on:click={handleCopy} />
+            <span class="iconfont icon-open-web hover-color-orange" on:click={handleOpenWeb} />
+          </div>
+        </div>
       </div>
     </div>
-    <div class="trans-lang flex-between padding-lr-16">
-      <FormSelect
-        on:handleClick={handleLeftClick}
-        options={langList}
-        on:handleChange={handleSelectChange}
-        bind:value={sourceLang}
-        bind:this={leftSelect}
-        bind:showList={leftShowList}
-      />
-      <i class="trans-lang-middle iconfont icon-arrow-compare flex-center hover-color-orange" />
-      <FormSelect
-        on:handleClick={handleRightClick}
-        options={langList}
-        on:handleChange={handleSelectChange}
-        bind:value={targetLang}
-        bind:this={rightSelect}
-        bind:showList={rightShowList}
-      />
-    </div>
-    <div class="padding-lr-16 padding-tb-8">
-      <span class="color-99 font-size-10 leading-8">原文</span>
-      <div class="font-size-14 color-333">In recent years, many companies have begun to use formal proofs to provide assurance for software.</div>
-    </div>
-    <div class="trans-target padding-lr-16">
-      <span class="color-99 font-size-10 leading-8">译文</span>
-      <div class="font-size-14">近年来，许多公司已开始使用形式证明来为软件提供保证。</div>
-      <div class="font-size-10 color-99 trans-target-api transition-300">由彩云小译提供翻译服务</div>
-    </div>
-  </div>
+  {/if}
 </main>
 
 <style lang="scss" scoped>
@@ -132,9 +203,6 @@
       .trans-bar-right {
         .icon-push-pin {
           transform: rotate(90deg);
-          &:hover {
-            transform: rotate(45deg);
-          }
         }
         .icon-close:hover {
           transform: rotate(-180deg);
@@ -150,16 +218,10 @@
     }
     .trans-target {
       background: rgba(255, 255, 255, 0.4);
-      padding-bottom: 40px;
     }
-    .trans-target > .trans-target-api {
-      margin-top: 16px;
-      float: right;
-      height: 24px;
-      line-height: 24px;
-    }
-    .trans-target > .trans-target-api:hover {
-      color: #243949;
+    .trans-footer {
+      margin-top: 8px;
+      height: 30px;
     }
   }
 </style>

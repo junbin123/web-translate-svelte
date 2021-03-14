@@ -4,6 +4,7 @@ var app = (function () {
     'use strict';
 
     function noop() { }
+    const identity = x => x;
     function add_location(element, file, line, column, char) {
         element.__svelte_meta = {
             loc: { file, line, column, char }
@@ -26,6 +27,41 @@ var app = (function () {
     }
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
+    }
+
+    const is_client = typeof window !== 'undefined';
+    let now = is_client
+        ? () => window.performance.now()
+        : () => Date.now();
+    let raf = is_client ? cb => requestAnimationFrame(cb) : noop;
+
+    const tasks = new Set();
+    function run_tasks(now) {
+        tasks.forEach(task => {
+            if (!task.c(now)) {
+                tasks.delete(task);
+                task.f();
+            }
+        });
+        if (tasks.size !== 0)
+            raf(run_tasks);
+    }
+    /**
+     * Creates a new task that runs on each raf frame
+     * until it returns a falsy value or is aborted
+     */
+    function loop(callback) {
+        let task;
+        if (tasks.size === 0)
+            raf(run_tasks);
+        return {
+            promise: new Promise(fulfill => {
+                tasks.add(task = { c: callback, f: fulfill });
+            }),
+            abort() {
+                tasks.delete(task);
+            }
+        };
     }
 
     function append(target, node) {
@@ -79,6 +115,67 @@ var app = (function () {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, false, false, detail);
         return e;
+    }
+
+    const active_docs = new Set();
+    let active = 0;
+    // https://github.com/darkskyapp/string-hash/blob/master/index.js
+    function hash(str) {
+        let hash = 5381;
+        let i = str.length;
+        while (i--)
+            hash = ((hash << 5) - hash) ^ str.charCodeAt(i);
+        return hash >>> 0;
+    }
+    function create_rule(node, a, b, duration, delay, ease, fn, uid = 0) {
+        const step = 16.666 / duration;
+        let keyframes = '{\n';
+        for (let p = 0; p <= 1; p += step) {
+            const t = a + (b - a) * ease(p);
+            keyframes += p * 100 + `%{${fn(t, 1 - t)}}\n`;
+        }
+        const rule = keyframes + `100% {${fn(b, 1 - b)}}\n}`;
+        const name = `__svelte_${hash(rule)}_${uid}`;
+        const doc = node.ownerDocument;
+        active_docs.add(doc);
+        const stylesheet = doc.__svelte_stylesheet || (doc.__svelte_stylesheet = doc.head.appendChild(element('style')).sheet);
+        const current_rules = doc.__svelte_rules || (doc.__svelte_rules = {});
+        if (!current_rules[name]) {
+            current_rules[name] = true;
+            stylesheet.insertRule(`@keyframes ${name} ${rule}`, stylesheet.cssRules.length);
+        }
+        const animation = node.style.animation || '';
+        node.style.animation = `${animation ? `${animation}, ` : ''}${name} ${duration}ms linear ${delay}ms 1 both`;
+        active += 1;
+        return name;
+    }
+    function delete_rule(node, name) {
+        const previous = (node.style.animation || '').split(', ');
+        const next = previous.filter(name
+            ? anim => anim.indexOf(name) < 0 // remove specific animation
+            : anim => anim.indexOf('__svelte') === -1 // remove all Svelte animations
+        );
+        const deleted = previous.length - next.length;
+        if (deleted) {
+            node.style.animation = next.join(', ');
+            active -= deleted;
+            if (!active)
+                clear_rules();
+        }
+    }
+    function clear_rules() {
+        raf(() => {
+            if (active)
+                return;
+            active_docs.forEach(doc => {
+                const stylesheet = doc.__svelte_stylesheet;
+                let i = stylesheet.cssRules.length;
+                while (i--)
+                    stylesheet.deleteRule(i);
+                doc.__svelte_rules = {};
+            });
+            active_docs.clear();
+        });
     }
 
     let current_component;
@@ -174,8 +271,35 @@ var app = (function () {
             $$.after_update.forEach(add_render_callback);
         }
     }
+
+    let promise;
+    function wait() {
+        if (!promise) {
+            promise = Promise.resolve();
+            promise.then(() => {
+                promise = null;
+            });
+        }
+        return promise;
+    }
+    function dispatch(node, direction, kind) {
+        node.dispatchEvent(custom_event(`${direction ? 'intro' : 'outro'}${kind}`));
+    }
     const outroing = new Set();
     let outros;
+    function group_outros() {
+        outros = {
+            r: 0,
+            c: [],
+            p: outros // parent group
+        };
+    }
+    function check_outros() {
+        if (!outros.r) {
+            run_all(outros.c);
+        }
+        outros = outros.p;
+    }
     function transition_in(block, local) {
         if (block && block.i) {
             outroing.delete(block);
@@ -198,12 +322,221 @@ var app = (function () {
             block.o(local);
         }
     }
+    const null_transition = { duration: 0 };
+    function create_in_transition(node, fn, params) {
+        let config = fn(node, params);
+        let running = false;
+        let animation_name;
+        let task;
+        let uid = 0;
+        function cleanup() {
+            if (animation_name)
+                delete_rule(node, animation_name);
+        }
+        function go() {
+            const { delay = 0, duration = 300, easing = identity, tick = noop, css } = config || null_transition;
+            if (css)
+                animation_name = create_rule(node, 0, 1, duration, delay, easing, css, uid++);
+            tick(0, 1);
+            const start_time = now() + delay;
+            const end_time = start_time + duration;
+            if (task)
+                task.abort();
+            running = true;
+            add_render_callback(() => dispatch(node, true, 'start'));
+            task = loop(now => {
+                if (running) {
+                    if (now >= end_time) {
+                        tick(1, 0);
+                        dispatch(node, true, 'end');
+                        cleanup();
+                        return running = false;
+                    }
+                    if (now >= start_time) {
+                        const t = easing((now - start_time) / duration);
+                        tick(t, 1 - t);
+                    }
+                }
+                return running;
+            });
+        }
+        let started = false;
+        return {
+            start() {
+                if (started)
+                    return;
+                delete_rule(node);
+                if (is_function(config)) {
+                    config = config();
+                    wait().then(go);
+                }
+                else {
+                    go();
+                }
+            },
+            invalidate() {
+                started = false;
+            },
+            end() {
+                if (running) {
+                    cleanup();
+                    running = false;
+                }
+            }
+        };
+    }
+    function create_out_transition(node, fn, params) {
+        let config = fn(node, params);
+        let running = true;
+        let animation_name;
+        const group = outros;
+        group.r += 1;
+        function go() {
+            const { delay = 0, duration = 300, easing = identity, tick = noop, css } = config || null_transition;
+            if (css)
+                animation_name = create_rule(node, 1, 0, duration, delay, easing, css);
+            const start_time = now() + delay;
+            const end_time = start_time + duration;
+            add_render_callback(() => dispatch(node, false, 'start'));
+            loop(now => {
+                if (running) {
+                    if (now >= end_time) {
+                        tick(0, 1);
+                        dispatch(node, false, 'end');
+                        if (!--group.r) {
+                            // this will result in `end()` being called,
+                            // so we don't need to clean up here
+                            run_all(group.c);
+                        }
+                        return false;
+                    }
+                    if (now >= start_time) {
+                        const t = easing((now - start_time) / duration);
+                        tick(1 - t, t);
+                    }
+                }
+                return running;
+            });
+        }
+        if (is_function(config)) {
+            wait().then(() => {
+                // @ts-ignore
+                config = config();
+                go();
+            });
+        }
+        else {
+            go();
+        }
+        return {
+            end(reset) {
+                if (reset && config.tick) {
+                    config.tick(1, 0);
+                }
+                if (running) {
+                    if (animation_name)
+                        delete_rule(node, animation_name);
+                    running = false;
+                }
+            }
+        };
+    }
 
     const globals = (typeof window !== 'undefined'
         ? window
         : typeof globalThis !== 'undefined'
             ? globalThis
             : global);
+    function outro_and_destroy_block(block, lookup) {
+        transition_out(block, 1, 1, () => {
+            lookup.delete(block.key);
+        });
+    }
+    function update_keyed_each(old_blocks, dirty, get_key, dynamic, ctx, list, lookup, node, destroy, create_each_block, next, get_context) {
+        let o = old_blocks.length;
+        let n = list.length;
+        let i = o;
+        const old_indexes = {};
+        while (i--)
+            old_indexes[old_blocks[i].key] = i;
+        const new_blocks = [];
+        const new_lookup = new Map();
+        const deltas = new Map();
+        i = n;
+        while (i--) {
+            const child_ctx = get_context(ctx, list, i);
+            const key = get_key(child_ctx);
+            let block = lookup.get(key);
+            if (!block) {
+                block = create_each_block(key, child_ctx);
+                block.c();
+            }
+            else if (dynamic) {
+                block.p(child_ctx, dirty);
+            }
+            new_lookup.set(key, new_blocks[i] = block);
+            if (key in old_indexes)
+                deltas.set(key, Math.abs(i - old_indexes[key]));
+        }
+        const will_move = new Set();
+        const did_move = new Set();
+        function insert(block) {
+            transition_in(block, 1);
+            block.m(node, next);
+            lookup.set(block.key, block);
+            next = block.first;
+            n--;
+        }
+        while (o && n) {
+            const new_block = new_blocks[n - 1];
+            const old_block = old_blocks[o - 1];
+            const new_key = new_block.key;
+            const old_key = old_block.key;
+            if (new_block === old_block) {
+                // do nothing
+                next = new_block.first;
+                o--;
+                n--;
+            }
+            else if (!new_lookup.has(old_key)) {
+                // remove old block
+                destroy(old_block, lookup);
+                o--;
+            }
+            else if (!lookup.has(new_key) || will_move.has(new_key)) {
+                insert(new_block);
+            }
+            else if (did_move.has(old_key)) {
+                o--;
+            }
+            else if (deltas.get(new_key) > deltas.get(old_key)) {
+                did_move.add(new_key);
+                insert(new_block);
+            }
+            else {
+                will_move.add(old_key);
+                o--;
+            }
+        }
+        while (o--) {
+            const old_block = old_blocks[o];
+            if (!new_lookup.has(old_block.key))
+                destroy(old_block, lookup);
+        }
+        while (n)
+            insert(new_blocks[n - 1]);
+        return new_blocks;
+    }
+    function validate_each_keys(ctx, list, get_context, get_key) {
+        const keys = new Set();
+        for (let i = 0; i < list.length; i++) {
+            const key = get_key(get_context(ctx, list, i));
+            if (keys.has(key)) {
+                throw new Error('Cannot have duplicate keys in a keyed each');
+            }
+            keys.add(key);
+        }
+    }
 
     function bind(component, name, callback) {
         const index = component.$$.props[name];
@@ -419,9 +752,9 @@ var app = (function () {
 
     /* src/components/main/Popup.svelte generated by Svelte v3.35.0 */
 
-    const file$3 = "src/components/main/Popup.svelte";
+    const file$4 = "src/components/main/Popup.svelte";
 
-    function create_fragment$3(ctx) {
+    function create_fragment$4(ctx) {
     	let main;
     	let div;
     	let t0;
@@ -436,8 +769,8 @@ var app = (function () {
     			t1 = text(/*name*/ ctx[0]);
     			t2 = text("!");
     			attr_dev(div, "class", "container svelte-1c28gv7");
-    			add_location(div, file$3, 5, 2, 47);
-    			add_location(main, file$3, 4, 0, 38);
+    			add_location(div, file$4, 5, 2, 47);
+    			add_location(main, file$4, 4, 0, 38);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -461,7 +794,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$3.name,
+    		id: create_fragment$4.name,
     		type: "component",
     		source: "",
     		ctx
@@ -470,7 +803,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$3($$self, $$props, $$invalidate) {
+    function instance$4($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Popup", slots, []);
     	let { name } = $$props;
@@ -500,13 +833,13 @@ var app = (function () {
     class Popup extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, { name: 0 });
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, { name: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Popup",
     			options,
-    			id: create_fragment$3.name
+    			id: create_fragment$4.name
     		});
 
     		const { ctx } = this.$$;
@@ -527,9 +860,9 @@ var app = (function () {
     }
 
     /* src/components/FormSelect.svelte generated by Svelte v3.35.0 */
-    const file$2 = "src/components/FormSelect.svelte";
+    const file$3 = "src/components/FormSelect.svelte";
 
-    function get_each_context(ctx, list, i) {
+    function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[7] = list[i];
     	child_ctx[9] = i;
@@ -537,7 +870,7 @@ var app = (function () {
     }
 
     // (46:4) {#each options as item, index}
-    function create_each_block(ctx) {
+    function create_each_block$1(ctx) {
     	let div;
     	let t0_value = /*item*/ ctx[7].name + "";
     	let t0;
@@ -552,7 +885,7 @@ var app = (function () {
     			t1 = space();
     			attr_dev(div, "data-index", /*index*/ ctx[9]);
     			attr_dev(div, "class", "select-item font-size-14 padding-lr-8 svelte-1n6x4zx");
-    			add_location(div, file$2, 46, 6, 1226);
+    			add_location(div, file$3, 46, 6, 1226);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -576,7 +909,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block.name,
+    		id: create_each_block$1.name,
     		type: "each",
     		source: "(46:4) {#each options as item, index}",
     		ctx
@@ -585,7 +918,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$2(ctx) {
+    function create_fragment$3(ctx) {
     	let main;
     	let div1;
     	let div0;
@@ -601,7 +934,7 @@ var app = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
     	}
 
     	const block = {
@@ -620,18 +953,18 @@ var app = (function () {
     			}
 
     			attr_dev(div0, "class", "font-size-14");
-    			add_location(div0, file$2, 41, 4, 927);
+    			add_location(div0, file$3, 41, 4, 927);
     			attr_dev(i, "class", "transition-300 iconfont icon-arrow-down svelte-1n6x4zx");
     			toggle_class(i, "arrow-up", /*showList*/ ctx[0]);
-    			add_location(i, file$2, 42, 4, 976);
+    			add_location(i, file$3, 42, 4, 976);
     			attr_dev(div1, "id", "select-box");
     			attr_dev(div1, "class", "color-main transition-300 bg-color-light-grey flex-between round-4 svelte-1n6x4zx");
-    			add_location(div1, file$2, 40, 2, 787);
+    			add_location(div1, file$3, 40, 2, 787);
     			attr_dev(div2, "class", "select-container round-4 bg-color-light-grey padding-tb-8 transition-300 svelte-1n6x4zx");
     			toggle_class(div2, "select-spread", /*showList*/ ctx[0]);
-    			add_location(div2, file$2, 44, 2, 1067);
+    			add_location(div2, file$3, 44, 2, 1067);
     			attr_dev(main, "class", "svelte-1n6x4zx");
-    			add_location(main, file$2, 39, 0, 778);
+    			add_location(main, file$3, 39, 0, 778);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -668,12 +1001,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context(ctx, each_value, i);
+    					const child_ctx = get_each_context$1(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i] = create_each_block$1(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(div2, null);
     					}
@@ -702,7 +1035,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$2.name,
+    		id: create_fragment$3.name,
     		type: "component",
     		source: "",
     		ctx
@@ -711,7 +1044,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$2($$self, $$props, $$invalidate) {
+    function instance$3($$self, $$props, $$invalidate) {
     	let selectName;
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("FormSelect", slots, []);
@@ -789,13 +1122,13 @@ var app = (function () {
     class FormSelect extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, { value: 5, options: 1, showList: 0 });
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, { value: 5, options: 1, showList: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "FormSelect",
     			options,
-    			id: create_fragment$2.name
+    			id: create_fragment$3.name
     		});
     	}
 
@@ -824,14 +1157,312 @@ var app = (function () {
     	}
     }
 
+    function backOut(t) {
+        const s = 1.70158;
+        return --t * t * ((s + 1) * t + s) + 1;
+    }
+    function cubicOut(t) {
+        const f = t - 1.0;
+        return f * f * f + 1.0;
+    }
+
+    function fade(node, { delay = 0, duration = 400, easing = identity } = {}) {
+        const o = +getComputedStyle(node).opacity;
+        return {
+            delay,
+            duration,
+            easing,
+            css: t => `opacity: ${t * o}`
+        };
+    }
+    function fly(node, { delay = 0, duration = 400, easing = cubicOut, x = 0, y = 0, opacity = 0 } = {}) {
+        const style = getComputedStyle(node);
+        const target_opacity = +style.opacity;
+        const transform = style.transform === 'none' ? '' : style.transform;
+        const od = target_opacity * (1 - opacity);
+        return {
+            delay,
+            duration,
+            easing,
+            css: (t, u) => `
+			transform: ${transform} translate(${(1 - t) * x}px, ${(1 - t) * y}px);
+			opacity: ${target_opacity - (od * u)}`
+        };
+    }
+
+    /* src/components/Basics/Toast.svelte generated by Svelte v3.35.0 */
+    const file$2 = "src/components/Basics/Toast.svelte";
+
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[5] = list[i];
+    	return child_ctx;
+    }
+
+    // (35:2) {#each toasts as toast (toast._id)}
+    function create_each_block(key_1, ctx) {
+    	let div;
+    	let t0_value = /*toast*/ ctx[5].msg + "";
+    	let t0;
+    	let t1;
+    	let div_intro;
+    	let div_outro;
+    	let current;
+
+    	const block = {
+    		key: key_1,
+    		first: null,
+    		c: function create() {
+    			div = element("div");
+    			t0 = text(t0_value);
+    			t1 = space();
+    			attr_dev(div, "class", "toast-item svelte-17x1kqk");
+    			add_location(div, file$2, 35, 4, 721);
+    			this.first = div;
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			append_dev(div, t0);
+    			append_dev(div, t1);
+    			current = true;
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if ((!current || dirty & /*toasts*/ 1) && t0_value !== (t0_value = /*toast*/ ctx[5].msg + "")) set_data_dev(t0, t0_value);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			add_render_callback(() => {
+    				if (div_outro) div_outro.end(1);
+
+    				if (!div_intro) div_intro = create_in_transition(div, fly, {
+    					delay: 0,
+    					duration: 300,
+    					x: 0,
+    					y: 50,
+    					opacity: 0.1,
+    					easing: backOut
+    				});
+
+    				div_intro.start();
+    			});
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (div_intro) div_intro.invalidate();
+    			div_outro = create_out_transition(div, fade, { duration: 500, opacity: 0 });
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			if (detaching && div_outro) div_outro.end();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(35:2) {#each toasts as toast (toast._id)}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$2(ctx) {
+    	let div;
+    	let each_blocks = [];
+    	let each_1_lookup = new Map();
+    	let current;
+    	let each_value = /*toasts*/ ctx[0];
+    	validate_each_argument(each_value);
+    	const get_key = ctx => /*toast*/ ctx[5]._id;
+    	validate_each_keys(ctx, each_value, get_each_context, get_key);
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		let child_ctx = get_each_context(ctx, each_value, i);
+    		let key = get_key(child_ctx);
+    		each_1_lookup.set(key, each_blocks[i] = create_each_block(key, child_ctx));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(div, "class", "toast-wrapper svelte-17x1kqk");
+    			add_location(div, file$2, 33, 0, 651);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div, null);
+    			}
+
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*toasts*/ 1) {
+    				each_value = /*toasts*/ ctx[0];
+    				validate_each_argument(each_value);
+    				group_outros();
+    				validate_each_keys(ctx, each_value, get_each_context, get_key);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block, null, get_each_context);
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			for (let i = 0; i < each_value.length; i += 1) {
+    				transition_in(each_blocks[i]);
+    			}
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				transition_out(each_blocks[i]);
+    			}
+
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].d();
+    			}
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$2.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$2($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("Toast", slots, []);
+    	let toasts = []; // 알람이 연속적으로 발생할 수 있으니 배열로 생성
+    	let retainMs = 3000; // 생성되고 사라질 시간
+
+    	// 알람을 추가한다, 변수로 단순하게 메시지 한 줄 받음
+    	let toastId = 0;
+
+    	const pushToast = (msg = "") => {
+    		$$invalidate(0, toasts = [...toasts, { _id: ++toastId, msg }]); // 새로운 할당
+
+    		setTimeout(
+    			() => {
+    				unshiftToast();
+    			},
+    			retainMs
+    		);
+    	};
+
+    	// 오래된 알람 하나 삭제
+    	const unshiftToast = () => {
+    		$$invalidate(0, toasts = toasts.filter((a, i) => i > 0)); // 새로운 할당
+    	};
+
+    	onMount(() => {
+    		window.showToast = pushToast;
+    	});
+
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Toast> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$capture_state = () => ({
+    		onMount,
+    		fade,
+    		fly,
+    		backOut,
+    		toasts,
+    		retainMs,
+    		toastId,
+    		pushToast,
+    		unshiftToast
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ("toasts" in $$props) $$invalidate(0, toasts = $$props.toasts);
+    		if ("retainMs" in $$props) retainMs = $$props.retainMs;
+    		if ("toastId" in $$props) toastId = $$props.toastId;
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [toasts];
+    }
+
+    class Toast extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Toast",
+    			options,
+    			id: create_fragment$2.name
+    		});
+    	}
+    }
+
+    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+    function getDefaultExportFromCjs (x) {
+    	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+    }
+
+    function createCommonjsModule(fn) {
+      var module = { exports: {} };
+    	return fn(module, module.exports), module.exports;
+    }
+
+    /*!
+     * clipboard.js v2.0.8
+     * https://clipboardjs.com/
+     *
+     * Licensed MIT © Zeno Rocha
+     */
+
+    var clipboard = createCommonjsModule(function (module, exports) {
+    !function(t,e){module.exports=e();}(commonjsGlobal,function(){return n={134:function(t,e,n){n.d(e,{default:function(){return r}});var e=n(279),i=n.n(e),e=n(370),a=n.n(e),e=n(817),o=n.n(e);function c(t){return (c="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t})(t)}function u(t,e){for(var n=0;n<e.length;n++){var r=e[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,r.key,r);}}var l=function(){function e(t){!function(t){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this),this.resolveOptions(t),this.initSelection();}var t,n;return t=e,(n=[{key:"resolveOptions",value:function(){var t=0<arguments.length&&void 0!==arguments[0]?arguments[0]:{};this.action=t.action,this.container=t.container,this.emitter=t.emitter,this.target=t.target,this.text=t.text,this.trigger=t.trigger,this.selectedText="";}},{key:"initSelection",value:function(){this.text?this.selectFake():this.target&&this.selectTarget();}},{key:"createFakeElement",value:function(){var t="rtl"===document.documentElement.getAttribute("dir");this.fakeElem=document.createElement("textarea"),this.fakeElem.style.fontSize="12pt",this.fakeElem.style.border="0",this.fakeElem.style.padding="0",this.fakeElem.style.margin="0",this.fakeElem.style.position="absolute",this.fakeElem.style[t?"right":"left"]="-9999px";t=window.pageYOffset||document.documentElement.scrollTop;return this.fakeElem.style.top="".concat(t,"px"),this.fakeElem.setAttribute("readonly",""),this.fakeElem.value=this.text,this.fakeElem}},{key:"selectFake",value:function(){var t=this,e=this.createFakeElement();this.fakeHandlerCallback=function(){return t.removeFake()},this.fakeHandler=this.container.addEventListener("click",this.fakeHandlerCallback)||!0,this.container.appendChild(e),this.selectedText=o()(e),this.copyText(),this.removeFake();}},{key:"removeFake",value:function(){this.fakeHandler&&(this.container.removeEventListener("click",this.fakeHandlerCallback),this.fakeHandler=null,this.fakeHandlerCallback=null),this.fakeElem&&(this.container.removeChild(this.fakeElem),this.fakeElem=null);}},{key:"selectTarget",value:function(){this.selectedText=o()(this.target),this.copyText();}},{key:"copyText",value:function(){var e;try{e=document.execCommand(this.action);}catch(t){e=!1;}this.handleResult(e);}},{key:"handleResult",value:function(t){this.emitter.emit(t?"success":"error",{action:this.action,text:this.selectedText,trigger:this.trigger,clearSelection:this.clearSelection.bind(this)});}},{key:"clearSelection",value:function(){this.trigger&&this.trigger.focus(),document.activeElement.blur(),window.getSelection().removeAllRanges();}},{key:"destroy",value:function(){this.removeFake();}},{key:"action",set:function(){var t=0<arguments.length&&void 0!==arguments[0]?arguments[0]:"copy";if(this._action=t,"copy"!==this._action&&"cut"!==this._action)throw new Error('Invalid "action" value, use either "copy" or "cut"')},get:function(){return this._action}},{key:"target",set:function(t){if(void 0!==t){if(!t||"object"!==c(t)||1!==t.nodeType)throw new Error('Invalid "target" value, use a valid Element');if("copy"===this.action&&t.hasAttribute("disabled"))throw new Error('Invalid "target" attribute. Please use "readonly" instead of "disabled" attribute');if("cut"===this.action&&(t.hasAttribute("readonly")||t.hasAttribute("disabled")))throw new Error('Invalid "target" attribute. You can\'t cut text from elements with "readonly" or "disabled" attributes');this._target=t;}},get:function(){return this._target}}])&&u(t.prototype,n),e}();function s(t){return (s="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t})(t)}function f(t,e){for(var n=0;n<e.length;n++){var r=e[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,r.key,r);}}function h(t,e){return (h=Object.setPrototypeOf||function(t,e){return t.__proto__=e,t})(t,e)}function d(n){var r=function(){if("undefined"==typeof Reflect||!Reflect.construct)return !1;if(Reflect.construct.sham)return !1;if("function"==typeof Proxy)return !0;try{return Date.prototype.toString.call(Reflect.construct(Date,[],function(){})),!0}catch(t){return !1}}();return function(){var t,e=p(n);return t=r?(t=p(this).constructor,Reflect.construct(e,arguments,t)):e.apply(this,arguments),e=this,!(t=t)||"object"!==s(t)&&"function"!=typeof t?function(t){if(void 0!==t)return t;throw new ReferenceError("this hasn't been initialised - super() hasn't been called")}(e):t}}function p(t){return (p=Object.setPrototypeOf?Object.getPrototypeOf:function(t){return t.__proto__||Object.getPrototypeOf(t)})(t)}function y(t,e){t="data-clipboard-".concat(t);if(e.hasAttribute(t))return e.getAttribute(t)}var r=function(){!function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function");t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,writable:!0,configurable:!0}}),e&&h(t,e);}(o,i());var t,e,n,r=d(o);function o(t,e){var n;return function(t){if(!(t instanceof o))throw new TypeError("Cannot call a class as a function")}(this),(n=r.call(this)).resolveOptions(e),n.listenClick(t),n}return t=o,n=[{key:"isSupported",value:function(){var t=0<arguments.length&&void 0!==arguments[0]?arguments[0]:["copy","cut"],t="string"==typeof t?[t]:t,e=!!document.queryCommandSupported;return t.forEach(function(t){e=e&&!!document.queryCommandSupported(t);}),e}}],(e=[{key:"resolveOptions",value:function(){var t=0<arguments.length&&void 0!==arguments[0]?arguments[0]:{};this.action="function"==typeof t.action?t.action:this.defaultAction,this.target="function"==typeof t.target?t.target:this.defaultTarget,this.text="function"==typeof t.text?t.text:this.defaultText,this.container="object"===s(t.container)?t.container:document.body;}},{key:"listenClick",value:function(t){var e=this;this.listener=a()(t,"click",function(t){return e.onClick(t)});}},{key:"onClick",value:function(t){t=t.delegateTarget||t.currentTarget;this.clipboardAction&&(this.clipboardAction=null),this.clipboardAction=new l({action:this.action(t),target:this.target(t),text:this.text(t),container:this.container,trigger:t,emitter:this});}},{key:"defaultAction",value:function(t){return y("action",t)}},{key:"defaultTarget",value:function(t){t=y("target",t);if(t)return document.querySelector(t)}},{key:"defaultText",value:function(t){return y("text",t)}},{key:"destroy",value:function(){this.listener.destroy(),this.clipboardAction&&(this.clipboardAction.destroy(),this.clipboardAction=null);}}])&&f(t.prototype,e),n&&f(t,n),o}();},828:function(t){var e;"undefined"==typeof Element||Element.prototype.matches||((e=Element.prototype).matches=e.matchesSelector||e.mozMatchesSelector||e.msMatchesSelector||e.oMatchesSelector||e.webkitMatchesSelector),t.exports=function(t,e){for(;t&&9!==t.nodeType;){if("function"==typeof t.matches&&t.matches(e))return t;t=t.parentNode;}};},438:function(t,e,n){var a=n(828);function i(t,e,n,r,o){var i=function(e,n,t,r){return function(t){t.delegateTarget=a(t.target,n),t.delegateTarget&&r.call(e,t);}}.apply(this,arguments);return t.addEventListener(n,i,o),{destroy:function(){t.removeEventListener(n,i,o);}}}t.exports=function(t,e,n,r,o){return "function"==typeof t.addEventListener?i.apply(null,arguments):"function"==typeof n?i.bind(null,document).apply(null,arguments):("string"==typeof t&&(t=document.querySelectorAll(t)),Array.prototype.map.call(t,function(t){return i(t,e,n,r,o)}))};},879:function(t,n){n.node=function(t){return void 0!==t&&t instanceof HTMLElement&&1===t.nodeType},n.nodeList=function(t){var e=Object.prototype.toString.call(t);return void 0!==t&&("[object NodeList]"===e||"[object HTMLCollection]"===e)&&"length"in t&&(0===t.length||n.node(t[0]))},n.string=function(t){return "string"==typeof t||t instanceof String},n.fn=function(t){return "[object Function]"===Object.prototype.toString.call(t)};},370:function(t,e,n){var l=n(879),s=n(438);t.exports=function(t,e,n){if(!t&&!e&&!n)throw new Error("Missing required arguments");if(!l.string(e))throw new TypeError("Second argument must be a String");if(!l.fn(n))throw new TypeError("Third argument must be a Function");if(l.node(t))return c=e,u=n,(a=t).addEventListener(c,u),{destroy:function(){a.removeEventListener(c,u);}};if(l.nodeList(t))return r=t,o=e,i=n,Array.prototype.forEach.call(r,function(t){t.addEventListener(o,i);}),{destroy:function(){Array.prototype.forEach.call(r,function(t){t.removeEventListener(o,i);});}};if(l.string(t))return t=t,e=e,n=n,s(document.body,t,e,n);throw new TypeError("First argument must be a String, HTMLElement, HTMLCollection, or NodeList");var r,o,i,a,c,u;};},817:function(t){t.exports=function(t){var e,n="SELECT"===t.nodeName?(t.focus(),t.value):"INPUT"===t.nodeName||"TEXTAREA"===t.nodeName?((e=t.hasAttribute("readonly"))||t.setAttribute("readonly",""),t.select(),t.setSelectionRange(0,t.value.length),e||t.removeAttribute("readonly"),t.value):(t.hasAttribute("contenteditable")&&t.focus(),n=window.getSelection(),(e=document.createRange()).selectNodeContents(t),n.removeAllRanges(),n.addRange(e),n.toString());return n};},279:function(t){function e(){}e.prototype={on:function(t,e,n){var r=this.e||(this.e={});return (r[t]||(r[t]=[])).push({fn:e,ctx:n}),this},once:function(t,e,n){var r=this;function o(){r.off(t,o),e.apply(n,arguments);}return o._=e,this.on(t,o,n)},emit:function(t){for(var e=[].slice.call(arguments,1),n=((this.e||(this.e={}))[t]||[]).slice(),r=0,o=n.length;r<o;r++)n[r].fn.apply(n[r].ctx,e);return this},off:function(t,e){var n=this.e||(this.e={}),r=n[t],o=[];if(r&&e)for(var i=0,a=r.length;i<a;i++)r[i].fn!==e&&r[i].fn._!==e&&o.push(r[i]);return o.length?n[t]=o:delete n[t],this}},t.exports=e,t.exports.TinyEmitter=e;}},o={},r.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return r.d(e,{a:e}),e},r.d=function(t,e){for(var n in e)r.o(e,n)&&!r.o(t,n)&&Object.defineProperty(t,n,{enumerable:!0,get:e[n]});},r.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},r(134).default;function r(t){if(o[t])return o[t].exports;var e=o[t]={exports:{}};return n[t](e,e.exports,r),e.exports}var n,o;});
+    });
+
+    var ClipboardJS = /*@__PURE__*/getDefaultExportFromCjs(clipboard);
+
     /* src/components/main/TranslatePop.svelte generated by Svelte v3.35.0 */
 
     const { console: console_1 } = globals;
     const file$1 = "src/components/main/TranslatePop.svelte";
 
-    function create_fragment$1(ctx) {
-    	let main;
-    	let div10;
+    // (118:2) {#if isShow}
+    function create_if_block(ctx) {
+    	let div12;
     	let div3;
     	let div0;
     	let i0;
@@ -863,25 +1494,35 @@ var app = (function () {
     	let t11;
     	let div5;
     	let t13;
-    	let div9;
+    	let div11;
     	let span4;
     	let t15;
     	let div7;
     	let t17;
+    	let div10;
     	let div8;
+    	let img;
+    	let img_src_value;
+    	let t18;
+    	let span5;
+    	let t20;
+    	let div9;
+    	let span6;
+    	let t21;
+    	let span7;
     	let current;
     	let mounted;
     	let dispose;
 
     	function formselect0_value_binding(value) {
-    		/*formselect0_value_binding*/ ctx[13](value);
+    		/*formselect0_value_binding*/ ctx[20](value);
     	}
 
     	function formselect0_showList_binding(value) {
-    		/*formselect0_showList_binding*/ ctx[15](value);
+    		/*formselect0_showList_binding*/ ctx[22](value);
     	}
 
-    	let formselect0_props = { options: /*langList*/ ctx[6] };
+    	let formselect0_props = { options: /*langList*/ ctx[8] };
 
     	if (/*sourceLang*/ ctx[0] !== void 0) {
     		formselect0_props.value = /*sourceLang*/ ctx[0];
@@ -893,20 +1534,20 @@ var app = (function () {
 
     	formselect0 = new FormSelect({ props: formselect0_props, $$inline: true });
     	binding_callbacks.push(() => bind(formselect0, "value", formselect0_value_binding));
-    	/*formselect0_binding*/ ctx[14](formselect0);
+    	/*formselect0_binding*/ ctx[21](formselect0);
     	binding_callbacks.push(() => bind(formselect0, "showList", formselect0_showList_binding));
-    	formselect0.$on("handleClick", /*handleLeftClick*/ ctx[9]);
-    	formselect0.$on("handleChange", /*handleSelectChange*/ ctx[11]);
+    	formselect0.$on("handleClick", /*handleLeftClick*/ ctx[16]);
+    	formselect0.$on("handleChange", /*handleSelectChange*/ ctx[18]);
 
     	function formselect1_value_binding(value) {
-    		/*formselect1_value_binding*/ ctx[16](value);
+    		/*formselect1_value_binding*/ ctx[23](value);
     	}
 
     	function formselect1_showList_binding(value) {
-    		/*formselect1_showList_binding*/ ctx[18](value);
+    		/*formselect1_showList_binding*/ ctx[25](value);
     	}
 
-    	let formselect1_props = { options: /*langList*/ ctx[6] };
+    	let formselect1_props = { options: /*langList*/ ctx[8] };
 
     	if (/*targetLang*/ ctx[1] !== void 0) {
     		formselect1_props.value = /*targetLang*/ ctx[1];
@@ -918,15 +1559,14 @@ var app = (function () {
 
     	formselect1 = new FormSelect({ props: formselect1_props, $$inline: true });
     	binding_callbacks.push(() => bind(formselect1, "value", formselect1_value_binding));
-    	/*formselect1_binding*/ ctx[17](formselect1);
+    	/*formselect1_binding*/ ctx[24](formselect1);
     	binding_callbacks.push(() => bind(formselect1, "showList", formselect1_showList_binding));
-    	formselect1.$on("handleClick", /*handleRightClick*/ ctx[10]);
-    	formselect1.$on("handleChange", /*handleSelectChange*/ ctx[11]);
+    	formselect1.$on("handleClick", /*handleRightClick*/ ctx[17]);
+    	formselect1.$on("handleChange", /*handleSelectChange*/ ctx[18]);
 
     	const block = {
     		c: function create() {
-    			main = element("main");
-    			div10 = element("div");
+    			div12 = element("div");
     			div3 = element("div");
     			div0 = element("div");
     			i0 = element("i");
@@ -955,68 +1595,85 @@ var app = (function () {
     			span3.textContent = "原文";
     			t11 = space();
     			div5 = element("div");
-    			div5.textContent = "In recent years, many companies have begun to use formal proofs to provide assurance for software.";
+    			div5.textContent = `${/*sourceText*/ ctx[11]}`;
     			t13 = space();
-    			div9 = element("div");
+    			div11 = element("div");
     			span4 = element("span");
     			span4.textContent = "译文";
     			t15 = space();
     			div7 = element("div");
-    			div7.textContent = "近年来，许多公司已开始使用形式证明来为软件提供保证。";
+    			div7.textContent = `${/*targetText*/ ctx[12]}`;
     			t17 = space();
+    			div10 = element("div");
     			div8 = element("div");
-    			div8.textContent = "由彩云小译提供翻译服务";
+    			img = element("img");
+    			t18 = space();
+    			span5 = element("span");
+    			span5.textContent = `${/*serviceDict*/ ctx[9][/*transService*/ ctx[10]].name}`;
+    			t20 = space();
+    			div9 = element("div");
+    			span6 = element("span");
+    			t21 = space();
+    			span7 = element("span");
     			attr_dev(i0, "class", "iconfont icon-setting font-size-16");
-    			add_location(i0, file$1, 60, 8, 1408);
-    			attr_dev(span0, "class", "trans-bar-left-name svelte-eomynx");
-    			add_location(span0, file$1, 61, 8, 1465);
+    			add_location(i0, file$1, 121, 10, 2774);
+    			attr_dev(span0, "class", "trans-bar-left-name svelte-kv1zhe");
+    			add_location(span0, file$1, 122, 10, 2833);
     			attr_dev(i1, "class", "iconfont icon-arrow-right");
-    			add_location(i1, file$1, 62, 8, 1517);
-    			attr_dev(div0, "class", "trans-bar-left flex-between hover-color-orange svelte-eomynx");
-    			add_location(div0, file$1, 59, 6, 1339);
+    			add_location(i1, file$1, 123, 10, 2887);
+    			attr_dev(div0, "class", "trans-bar-left flex-between hover-color-orange svelte-kv1zhe");
+    			add_location(div0, file$1, 120, 8, 2703);
     			attr_dev(div1, "id", "trans-bar-middle");
-    			attr_dev(div1, "class", "svelte-eomynx");
-    			add_location(div1, file$1, 64, 6, 1576);
-    			attr_dev(span1, "class", "iconfont icon-push-pin padding-lr-8 hover-color-orange svelte-eomynx");
-    			toggle_class(span1, "icon-push-is-pin", /*isPin*/ ctx[7]);
-    			add_location(span1, file$1, 66, 8, 1655);
-    			attr_dev(span2, "class", "iconfont icon-close hover-color-orange svelte-eomynx");
-    			add_location(span2, file$1, 67, 8, 1792);
+    			attr_dev(div1, "class", "svelte-kv1zhe");
+    			add_location(div1, file$1, 125, 8, 2950);
+    			attr_dev(span1, "class", "iconfont icon-push-pin padding-lr-8 hover-color-orange svelte-kv1zhe");
+    			toggle_class(span1, "icon-push-is-pin", /*isPin*/ ctx[6]);
+    			add_location(span1, file$1, 127, 10, 3033);
+    			attr_dev(span2, "class", "iconfont icon-close hover-color-orange svelte-kv1zhe");
+    			add_location(span2, file$1, 128, 10, 3172);
     			attr_dev(div2, "class", "trans-bar-right flex");
-    			add_location(div2, file$1, 65, 6, 1612);
-    			attr_dev(div3, "class", "trans-bar font-size-12 color-main flex-between padding-lr-16 svelte-eomynx");
-    			add_location(div3, file$1, 58, 4, 1258);
+    			add_location(div2, file$1, 126, 8, 2988);
+    			attr_dev(div3, "class", "trans-bar font-size-12 color-main flex-between padding-lr-16 svelte-kv1zhe");
+    			add_location(div3, file$1, 119, 6, 2620);
     			attr_dev(i2, "class", "trans-lang-middle iconfont icon-arrow-compare flex-center hover-color-orange");
-    			add_location(i2, file$1, 79, 6, 2197);
-    			attr_dev(div4, "class", "trans-lang flex-between padding-lr-16 svelte-eomynx");
-    			add_location(div4, file$1, 70, 4, 1899);
+    			add_location(i2, file$1, 140, 8, 3601);
+    			attr_dev(div4, "class", "trans-lang flex-between padding-lr-16 svelte-kv1zhe");
+    			add_location(div4, file$1, 131, 6, 3285);
     			attr_dev(span3, "class", "color-99 font-size-10 leading-8");
-    			add_location(span3, file$1, 90, 6, 2593);
-    			attr_dev(div5, "class", "font-size-14 color-333");
-    			add_location(div5, file$1, 91, 6, 2655);
+    			add_location(span3, file$1, 151, 8, 4019);
+    			attr_dev(div5, "class", "font-size-14 color-33");
+    			add_location(div5, file$1, 152, 8, 4083);
     			attr_dev(div6, "class", "padding-lr-16 padding-tb-8");
-    			add_location(div6, file$1, 89, 4, 2546);
+    			add_location(div6, file$1, 150, 6, 3970);
     			attr_dev(span4, "class", "color-99 font-size-10 leading-8");
-    			add_location(span4, file$1, 94, 6, 2858);
+    			add_location(span4, file$1, 155, 8, 4205);
     			attr_dev(div7, "class", "font-size-14");
-    			add_location(div7, file$1, 95, 6, 2920);
-    			attr_dev(div8, "class", "font-size-10 color-99 trans-target-api transition-300 svelte-eomynx");
-    			add_location(div8, file$1, 96, 6, 2985);
-    			attr_dev(div9, "class", "trans-target padding-lr-16 svelte-eomynx");
-    			add_location(div9, file$1, 93, 4, 2811);
-    			attr_dev(div10, "class", "select-trans-pop color-main svelte-eomynx");
-    			attr_dev(div10, "style", /*boxStyle*/ ctx[8]);
-    			toggle_class(div10, "select-trans-pop-pin", /*isPin*/ ctx[7]);
-    			add_location(div10, file$1, 57, 2, 1134);
-    			add_location(main, file$1, 56, 0, 1125);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    			add_location(div7, file$1, 156, 8, 4269);
+    			if (img.src !== (img_src_value = /*serviceDict*/ ctx[9][/*transService*/ ctx[10]].src)) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "width", "16");
+    			attr_dev(img, "height", "16");
+    			attr_dev(img, "alt", /*transService*/ ctx[10]);
+    			add_location(img, file$1, 159, 12, 4465);
+    			add_location(span5, file$1, 160, 12, 4563);
+    			attr_dev(div8, "class", "font-size-12 color-66 transition-300 flex");
+    			add_location(div8, file$1, 158, 10, 4372);
+    			attr_dev(span6, "class", "iconfont icon-copy padding-lr-8 hover-color-orange");
+    			add_location(span6, file$1, 163, 12, 4654);
+    			attr_dev(span7, "class", "iconfont icon-open-web hover-color-orange");
+    			add_location(span7, file$1, 164, 12, 4756);
+    			add_location(div9, file$1, 162, 10, 4636);
+    			attr_dev(div10, "class", "trans-footer flex-between svelte-kv1zhe");
+    			add_location(div10, file$1, 157, 8, 4322);
+    			attr_dev(div11, "class", "trans-target padding-lr-16 svelte-kv1zhe");
+    			add_location(div11, file$1, 154, 6, 4156);
+    			attr_dev(div12, "class", "select-trans-pop color-main svelte-kv1zhe");
+    			attr_dev(div12, "style", /*boxStyle*/ ctx[13]);
+    			toggle_class(div12, "select-trans-pop-pin", /*isPin*/ ctx[6]);
+    			add_location(div12, file$1, 118, 4, 2494);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, main, anchor);
-    			append_dev(main, div10);
-    			append_dev(div10, div3);
+    			insert_dev(target, div12, anchor);
+    			append_dev(div12, div3);
     			append_dev(div3, div0);
     			append_dev(div0, i0);
     			append_dev(div0, t0);
@@ -1030,38 +1687,54 @@ var app = (function () {
     			append_dev(div2, span1);
     			append_dev(div2, t5);
     			append_dev(div2, span2);
-    			append_dev(div10, t6);
-    			append_dev(div10, div4);
+    			append_dev(div12, t6);
+    			append_dev(div12, div4);
     			mount_component(formselect0, div4, null);
     			append_dev(div4, t7);
     			append_dev(div4, i2);
     			append_dev(div4, t8);
     			mount_component(formselect1, div4, null);
-    			append_dev(div10, t9);
-    			append_dev(div10, div6);
+    			append_dev(div12, t9);
+    			append_dev(div12, div6);
     			append_dev(div6, span3);
     			append_dev(div6, t11);
     			append_dev(div6, div5);
-    			append_dev(div10, t13);
+    			append_dev(div12, t13);
+    			append_dev(div12, div11);
+    			append_dev(div11, span4);
+    			append_dev(div11, t15);
+    			append_dev(div11, div7);
+    			append_dev(div11, t17);
+    			append_dev(div11, div10);
+    			append_dev(div10, div8);
+    			append_dev(div8, img);
+    			append_dev(div8, t18);
+    			append_dev(div8, span5);
+    			append_dev(div10, t20);
     			append_dev(div10, div9);
-    			append_dev(div9, span4);
-    			append_dev(div9, t15);
-    			append_dev(div9, div7);
-    			append_dev(div9, t17);
-    			append_dev(div9, div8);
+    			append_dev(div9, span6);
+    			append_dev(div9, t21);
+    			append_dev(div9, span7);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(span1, "click", handlePinClick, false, false, false),
-    					listen_dev(span2, "click", handleClose, false, false, false),
-    					listen_dev(div10, "click", /*handleBoxClick*/ ctx[12], false, false, false)
+    					listen_dev(span1, "click", /*handlePinClick*/ ctx[14], false, false, false),
+    					listen_dev(span2, "click", /*handleClose*/ ctx[15], false, false, false),
+    					listen_dev(div8, "click", handleOpenWeb, false, false, false),
+    					listen_dev(span6, "click", handleCopy, false, false, false),
+    					listen_dev(span7, "click", handleOpenWeb, false, false, false),
+    					listen_dev(div12, "click", /*handleBoxClick*/ ctx[19], false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
-    		p: function update(ctx, [dirty]) {
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*isPin*/ 64) {
+    				toggle_class(span1, "icon-push-is-pin", /*isPin*/ ctx[6]);
+    			}
+
     			const formselect0_changes = {};
 
     			if (!updating_value && dirty & /*sourceLang*/ 1) {
@@ -1092,6 +1765,10 @@ var app = (function () {
     			}
 
     			formselect1.$set(formselect1_changes);
+
+    			if (dirty & /*isPin*/ 64) {
+    				toggle_class(div12, "select-trans-pop-pin", /*isPin*/ ctx[6]);
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -1105,13 +1782,92 @@ var app = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(main);
-    			/*formselect0_binding*/ ctx[14](null);
+    			if (detaching) detach_dev(div12);
+    			/*formselect0_binding*/ ctx[21](null);
     			destroy_component(formselect0);
-    			/*formselect1_binding*/ ctx[17](null);
+    			/*formselect1_binding*/ ctx[24](null);
     			destroy_component(formselect1);
     			mounted = false;
     			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(118:2) {#if isShow}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$1(ctx) {
+    	let main;
+    	let toast;
+    	let t;
+    	let current;
+    	toast = new Toast({ $$inline: true });
+    	let if_block = /*isShow*/ ctx[7] && create_if_block(ctx);
+
+    	const block = {
+    		c: function create() {
+    			main = element("main");
+    			create_component(toast.$$.fragment);
+    			t = space();
+    			if (if_block) if_block.c();
+    			add_location(main, file$1, 115, 0, 2456);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, main, anchor);
+    			mount_component(toast, main, null);
+    			append_dev(main, t);
+    			if (if_block) if_block.m(main, null);
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (/*isShow*/ ctx[7]) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+
+    					if (dirty & /*isShow*/ 128) {
+    						transition_in(if_block, 1);
+    					}
+    				} else {
+    					if_block = create_if_block(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(main, null);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(toast.$$.fragment, local);
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(toast.$$.fragment, local);
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(main);
+    			destroy_component(toast);
+    			if (if_block) if_block.d();
     		}
     	};
 
@@ -1126,20 +1882,23 @@ var app = (function () {
     	return block;
     }
 
-    const pinClass = "iconfont icon-push-pin hover-transition icon-push-is-pin";
-    const noPinClass = "iconfont icon-push-pin hover-transition";
-
-    function handlePinClick() {
+    function handleCopy() {
     	
     }
 
-    function handleClose() {
-    	
+    // 跳转网页点击
+    function handleOpenWeb() {
+    	window.open("http://fanyi.youdao.com/", "_blank");
     }
 
     function instance$1($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("TranslatePop", slots, []);
+    	const clipboard = new ClipboardJS(".icon-copy", { text: () => targetText });
+
+    	clipboard.on("success", e => {
+    		window.showToast("已复制译文");
+    	});
 
     	const langList = [
     		{ name: "中文", value: "zh" },
@@ -1153,30 +1912,75 @@ var app = (function () {
     	let rightSelect;
     	let leftShowList = false;
     	let rightShowList = false;
-    	let isPin = true;
-    	let name = "jjj";
+
+    	const serviceDict = {
+    		google: {
+    			name: "谷歌翻译",
+    			src: "./images/logo/google-logo.png",
+    			url: "https://translate.google.cn/"
+    		}, // https://translate.google.cn/?sl=en&tl=zh-CN&text=hello&op=translate
+    		youdao: {
+    			name: "有道翻译",
+    			src: "./images/logo/youdao-logo.png",
+    			url: "http://fanyi.youdao.com/"
+    		},
+    		baidu: {
+    			name: "百度翻译",
+    			src: "./images/logo/baidu-logo.png",
+    			url: "https://fanyi.baidu.com/"
+    		}, // https://fanyi.baidu.com/#en/zh/hello
+    		caiyun: {
+    			name: "彩云小译",
+    			src: "./images/logo/caiyun-logo.png",
+    			url: "https://fanyi.caiyunapp.com/#/"
+    		},
+    		deepl: {
+    			name: "DeepL 翻译",
+    			src: "./images/logo/deepl-logo.png",
+    			url: "https://www.deepl.com/translator"
+    		}, // https://www.deepl.com/translator#en/zh/hello
+    		
+    	};
+
+    	let transService = "google"; // 使用的翻译服务
+    	let sourceText = "要翻译的原文";
+    	let targetText = "翻译好赛盖饭的";
+    	let isPin = false;
+    	let isShow = true;
 
     	let boxStyle = {
     		position: "fixed",
-    		top: 8 + "px",
+    		top: 20 + "px",
     		left: 8 + "px"
     	};
 
+    	// 图钉icon点击事件
+    	function handlePinClick() {
+    		$$invalidate(6, isPin = !isPin);
+    	}
+
+    	// 关闭icon点击事件
+    	function handleClose() {
+    		$$invalidate(7, isShow = false);
+    	} // setTimeout(() => {
+    	//   isShow = true
+
+    	// 左边选择器点击
     	function handleLeftClick(e) {
     		$$invalidate(5, rightShowList = false);
-    		console.log(e);
     	}
 
+    	// 右边选择器点击
     	function handleRightClick(e) {
     		$$invalidate(4, leftShowList = false);
-    		console.log(e);
     	}
 
-    	function handleSelectChange(e) {
+    	// 翻译语言切换
+    	function handleSelectChange() {
     		console.log({ sourceLang, targetLang });
     	}
 
-    	// 组件点击
+    	// 组件点击事件
     	function handleBoxClick() {
     		$$invalidate(4, leftShowList = false);
     		$$invalidate(5, rightShowList = false);
@@ -1229,6 +2033,9 @@ var app = (function () {
     	$$self.$capture_state = () => ({
     		onMount,
     		FormSelect,
+    		Toast,
+    		ClipboardJS,
+    		clipboard,
     		langList,
     		sourceLang,
     		targetLang,
@@ -1236,13 +2043,17 @@ var app = (function () {
     		rightSelect,
     		leftShowList,
     		rightShowList,
+    		serviceDict,
+    		transService,
+    		sourceText,
+    		targetText,
     		isPin,
-    		name,
+    		isShow,
     		boxStyle,
-    		pinClass,
-    		noPinClass,
     		handlePinClick,
     		handleClose,
+    		handleCopy,
+    		handleOpenWeb,
     		handleLeftClick,
     		handleRightClick,
     		handleSelectChange,
@@ -1256,9 +2067,12 @@ var app = (function () {
     		if ("rightSelect" in $$props) $$invalidate(3, rightSelect = $$props.rightSelect);
     		if ("leftShowList" in $$props) $$invalidate(4, leftShowList = $$props.leftShowList);
     		if ("rightShowList" in $$props) $$invalidate(5, rightShowList = $$props.rightShowList);
-    		if ("isPin" in $$props) $$invalidate(7, isPin = $$props.isPin);
-    		if ("name" in $$props) name = $$props.name;
-    		if ("boxStyle" in $$props) $$invalidate(8, boxStyle = $$props.boxStyle);
+    		if ("transService" in $$props) $$invalidate(10, transService = $$props.transService);
+    		if ("sourceText" in $$props) $$invalidate(11, sourceText = $$props.sourceText);
+    		if ("targetText" in $$props) $$invalidate(12, targetText = $$props.targetText);
+    		if ("isPin" in $$props) $$invalidate(6, isPin = $$props.isPin);
+    		if ("isShow" in $$props) $$invalidate(7, isShow = $$props.isShow);
+    		if ("boxStyle" in $$props) $$invalidate(13, boxStyle = $$props.boxStyle);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -1272,9 +2086,16 @@ var app = (function () {
     		rightSelect,
     		leftShowList,
     		rightShowList,
-    		langList,
     		isPin,
+    		isShow,
+    		langList,
+    		serviceDict,
+    		transService,
+    		sourceText,
+    		targetText,
     		boxStyle,
+    		handlePinClick,
+    		handleClose,
     		handleLeftClick,
     		handleRightClick,
     		handleSelectChange,
