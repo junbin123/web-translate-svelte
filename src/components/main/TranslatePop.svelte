@@ -5,6 +5,7 @@
   import ClipboardJS from '../../utils/clipboard.js'
   import { startDrag } from '../../utils/drag.js' // 拖拽方法
   import { queryStringify } from '../../utils/common.js' // 拖拽方法
+  import { caiyunOptions } from '../../static/options/index' // 翻译语言下拉框数据
   const clipboard = new ClipboardJS('.icon-copy', {
     text: () => targetText
   })
@@ -12,20 +13,7 @@
     window.showToast('已复制译文')
   })
 
-  const langList = [
-    {
-      name: '中文',
-      value: 'zh'
-    },
-    {
-      name: '英语',
-      value: 'en'
-    },
-    {
-      name: '日语',
-      value: 'ja'
-    }
-  ]
+  const langList = caiyunOptions
   let sourceLang = 'en'
   let targetLang = 'zh'
   let leftSelect
