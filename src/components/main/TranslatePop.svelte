@@ -5,7 +5,9 @@
   import ClipboardJS from '../../utils/clipboard.js'
   import { startDrag } from '../../utils/drag.js' // 拖拽方法
   import { queryStringify } from '../../utils/common.js' // 拖拽方法
-  import { caiyunOptions } from '../../static/options/index' // 翻译语言下拉框数据
+  import { baiduOptions, caiyunOptions, deeplOptions, googleOptions, youdaoOptions } from '../../static/options/index' // 翻译语言下拉框数据
+  import { transServiceDict } from '../../static/trans'
+
   const clipboard = new ClipboardJS('.icon-copy', {
     text: () => targetText
   })
@@ -21,36 +23,6 @@
   let leftShowList = false
   let rightShowList = false
 
-  const serviceDict = {
-    google: {
-      name: '谷歌翻译',
-      src: './images/logo/google-logo.png',
-      url: 'https://translate.google.cn/'
-      // https://translate.google.cn/?sl=en&tl=zh-CN&text=hello&op=translate
-    },
-    youdao: {
-      name: '有道翻译',
-      src: './images/logo/youdao-logo.png',
-      url: 'http://fanyi.youdao.com/'
-    },
-    baidu: {
-      name: '百度翻译',
-      src: './images/logo/baidu-logo.png',
-      url: 'https://fanyi.baidu.com/'
-      // https://fanyi.baidu.com/#en/zh/hello
-    },
-    caiyun: {
-      name: '彩云小译',
-      src: './images/logo/caiyun-logo.png',
-      url: 'https://fanyi.caiyunapp.com/#/'
-    },
-    deepl: {
-      name: 'DeepL 翻译',
-      src: './images/logo/deepl-logo.png',
-      url: 'https://www.deepl.com/translator'
-      // https://www.deepl.com/translator#en/zh/hello
-    }
-  }
   let transService = 'google' // 使用的翻译服务
 
   let sourceText = '要翻译的原文'
@@ -59,25 +31,24 @@
   let isPin = false
   let isShow = true
 
-  let boxStyle = {
-    left: '0px',
-    top: '0px'
-  }
-  console.log(queryStringify(boxStyle), 'kk')
+  let boxStyle = {}
+  let boxLeft = ''
+  let boxTop = ''
 
   // 图钉icon点击事件
   function handlePinClick() {
     isPin = !isPin
     if (isPin) {
-      // boxStyle=
+      boxStyle = {
+        position: 'fixed',
+        left: boxLeft,
+        top: boxTop
+      }
     }
   }
   // 关闭icon点击事件
   function handleClose() {
     isShow = false
-    // setTimeout(() => {
-    //   isShow = true
-    // }, 3000)
   }
   // 复制点击事件
   function handleCopy() {}
@@ -102,39 +73,14 @@
     leftShowList = false
     rightShowList = false
   }
-  function dragStart(e) {
-    console.log(e, 'dragStart')
-  }
-  function dragEnd({ target }) {
-    console.log({ ...target }, 'dragEnd')
-    const { offsetTop, offsetLeft } = target
-    console.log(offsetTop, offsetLeft)
-    //     offsetHeight: 200
-    // offsetLeft: 0
-    // offsetParent: main.svelte-1tecc95
-    // offsetTop: 18
-    // offsetWidth: 320
-  }
-  function dragExit(e) {
-    console.log('dragExit', e)
-  }
-  function mouseDown(e) {
-    console.log('mouseDown', e)
-  }
-  function mouseUp(e) {
-    console.log('onmouseUp', e)
-  }
-  function mouseMove(e) {
-    // console.log('mouseMove', e)
-  }
-  function mouseOver(e) {
-    console.log('mouseOver', e)
-  }
+
   // 拖拽方法处理
   onMount(() => {
     const targetDom = document.getElementById('trans-box')
     const dragDom = document.getElementById('trans-bar-middle')
     startDrag(dragDom, targetDom, (x, y) => {
+      boxLeft = x + 'px'
+      boxTop = y + 'px'
       console.log(x, y, '00')
     })
   })
@@ -191,8 +137,8 @@
         <div class="font-size-14">{targetText}</div>
         <div class="trans-footer flex-between">
           <div class="font-size-12 color-66 transition-300 flex" on:click={handleOpenWeb}>
-            <img src={serviceDict[transService].src} width="16" height="16" alt={transService} />
-            <span>{serviceDict[transService].name}</span>
+            <img src={transServiceDict[transService].src} width="16" height="16" alt={transService} />
+            <span>{transServiceDict[transService].name}</span>
           </div>
           <div>
             <span class="iconfont icon-copy padding-lr-8 hover-color-orange" on:click={handleCopy} />
@@ -206,8 +152,8 @@
 
 <style lang="scss" scoped>
   .select-trans-pop-pin {
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
-    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2) !important;
+    background: rgba(255, 255, 255, 0.5) !important;
   }
   .select-trans-pop {
     width: 320px;
@@ -219,6 +165,8 @@
     box-sizing: border-box;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
     background: rgba(250, 250, 250, 0.6);
+    left: 0;
+    top: 0;
     .trans-bar {
       height: 36px;
       width: 100%;

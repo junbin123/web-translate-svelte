@@ -3,11 +3,14 @@
 </script>
 
 <main>
-  <div class="container">Hello {name}!</div>
+  <div class="container">Hello {name}!我是popup</div>
 </main>
 
 <style>
   .container {
+    width: 280px;
+    min-height: 330px;
+    background: #f8f8f8;
     /* position: fixed;
     top: 0;
     z-index: 99;
