@@ -4,6 +4,7 @@
   import Toast from '../Basics/Toast.svelte'
   import ClipboardJS from '../../utils/clipboard.js'
   import { startDrag } from '../../utils/drag.js' // 拖拽方法
+  import { queryStringify } from '../../utils/common.js' // 拖拽方法
   const clipboard = new ClipboardJS('.icon-copy', {
     text: () => targetText
   })
@@ -70,10 +71,18 @@
   let isPin = false
   let isShow = true
 
-  let boxStyle = 'top:0px;left:0px'
+  let boxStyle = {
+    left: '0px',
+    top: '0px'
+  }
+  console.log(queryStringify(boxStyle), 'kk')
+
   // 图钉icon点击事件
   function handlePinClick() {
     isPin = !isPin
+    if (isPin) {
+      // boxStyle=
+    }
   }
   // 关闭icon点击事件
   function handleClose() {
@@ -146,7 +155,14 @@
 <main>
   <Toast />
   {#if isShow}
-    <div id="trans-box" class="select-trans-pop color-main" class:select-trans-pop-pin={isPin} style={boxStyle} on:click={handleBoxClick} draggable="true">
+    <div
+      id="trans-box"
+      class="select-trans-pop color-main"
+      class:select-trans-pop-pin={isPin}
+      style={queryStringify(boxStyle)}
+      on:click={handleBoxClick}
+      draggable="true"
+    >
       <div class="trans-bar font-size-12 color-main flex-between padding-lr-16">
         <div class="trans-bar-left flex-between hover-color-orange">
           <i class="iconfont icon-setting font-size-16" />
@@ -215,8 +231,6 @@
     box-sizing: border-box;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
     background: rgba(250, 250, 250, 0.6);
-    left: 0;
-    top: 0;
     .trans-bar {
       height: 36px;
       width: 100%;

@@ -51,3 +51,11 @@ export const getListByLength = ({ list = [], length = 1000 }) => {
     endIndex
   }
 }
+
+/**
+ * 对象参数转字符串
+ * @param {*} params 路由参数
+ */
+export const queryStringify = (params = {}) => {
+  return Object.keys(params).reduce((p, c, i) => p + `${i === 0 ? '' : ';'}${c}:${params[c]}`, '')
+}
