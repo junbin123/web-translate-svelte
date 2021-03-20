@@ -3,6 +3,7 @@
   import FormSelect from '../FormSelect.svelte'
   import Toast from '../Basics/Toast.svelte'
   import ClipboardJS from '../../utils/clipboard.js'
+  import { startDrag } from '../../utils/drag.js' // 拖拽方法
   const clipboard = new ClipboardJS('.icon-copy', {
     text: () => targetText
   })
@@ -69,11 +70,7 @@
   let isPin = false
   let isShow = true
 
-  let boxStyle = {
-    position: 'fixed',
-    top: 20 + 'px',
-    left: 8 + 'px'
-  }
+  let boxStyle = 'top:0px;left:0px'
   // 图钉icon点击事件
   function handlePinClick() {
     isPin = !isPin
@@ -108,15 +105,48 @@
     leftShowList = false
     rightShowList = false
   }
+  function dragStart(e) {
+    console.log(e, 'dragStart')
+  }
+  function dragEnd({ target }) {
+    console.log({ ...target }, 'dragEnd')
+    const { offsetTop, offsetLeft } = target
+    console.log(offsetTop, offsetLeft)
+    //     offsetHeight: 200
+    // offsetLeft: 0
+    // offsetParent: main.svelte-1tecc95
+    // offsetTop: 18
+    // offsetWidth: 320
+  }
+  function dragExit(e) {
+    console.log('dragExit', e)
+  }
+  function mouseDown(e) {
+    console.log('mouseDown', e)
+  }
+  function mouseUp(e) {
+    console.log('onmouseUp', e)
+  }
+  function mouseMove(e) {
+    // console.log('mouseMove', e)
+  }
+  function mouseOver(e) {
+    console.log('mouseOver', e)
+  }
+  // 拖拽方法处理
   onMount(() => {
-    console.log('onMount')
+    const targetDom = document.getElementById('trans-box')
+    const dragDom = document.getElementById('trans-bar-middle')
+    startDrag(dragDom, targetDom, (x, y) => {
+      console.log(x, y, '00')
+    })
   })
 </script>
 
 <main>
   <Toast />
   {#if isShow}
-    <div class="select-trans-pop color-main" class:select-trans-pop-pin={isPin} style={boxStyle} on:click={handleBoxClick}>
+    <div id="trans-box" class="select-trans-pop color-main" class:select-trans-pop-pin={isPin} style={boxStyle} on:click={handleBoxClick} draggable="true">
       <div class="trans-bar font-size-12 color-main flex-between padding-lr-16">
         <div class="trans-bar-left flex-between hover-color-orange">
           <i class="iconfont icon-setting font-size-16" />
@@ -180,11 +210,13 @@
     backdrop-filter: blur(40px);
     border-radius: 4px;
     cursor: pointer;
-    position: relative;
+    position: absolute;
     overflow: hidden;
     box-sizing: border-box;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
     background: rgba(250, 250, 250, 0.6);
+    left: 0;
+    top: 0;
     .trans-bar {
       height: 36px;
       width: 100%;

@@ -4,7 +4,7 @@
   import { backOut } from 'svelte/easing'
 
   let toasts = [] // 알람이 연속적으로 발생할 수 있으니 배열로 생성
-  let retainMs = 3000 // 생성되고 사라질 시간
+  let retainMs = 2000 // 생성되고 사라질 시간
 
   // 알람을 추가한다, 변수로 단순하게 메시지 한 줄 받음
   let toastId = 0
@@ -33,7 +33,7 @@
 
 <div class="toast-wrapper">
   {#each toasts as toast (toast._id)}
-    <div class="toast-item" in:fly={{ delay: 0, duration: 300, x: 0, y: 50, opacity: 0.1, easing: backOut }} out:fade={{ duration: 500, opacity: 0 }}>
+    <div class="toast-item" in:fly={{ delay: 0, duration: 300, x: 0, y: 50, opacity: 0.1, easing: backOut }} out:fade={{ duration: 300, opacity: 0 }}>
       {toast.msg}
     </div>
   {/each}
@@ -44,7 +44,7 @@
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 0;
+    top: 0;
     text-align: center;
     z-index: 9999;
   }
