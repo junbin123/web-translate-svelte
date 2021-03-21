@@ -59,3 +59,25 @@ export const getListByLength = ({ list = [], length = 1000 }) => {
 export const queryStringify = (params = {}) => {
   return Object.keys(params).reduce((p, c, i) => p + `${i === 0 ? '' : ';'}${c}:${params[c]}`, '')
 }
+
+/**
+ * 节流函数
+ */
+
+/**
+ * 防抖函数
+ * @param {function} fn 执行函数
+ * @param {number} delay 间隔时间
+ */
+export const debounce = (fn, delay = 500) => {
+  let timer = null
+  return function () {
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      fn.apply(this, arguments)
+      timer = null
+    }, delay)
+  }
+}

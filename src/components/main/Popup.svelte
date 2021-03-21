@@ -1,16 +1,18 @@
 <script>
-  export let name
+  import TransTextarea from '../Basics/TransTextarea.svelte'
+  export let name = 'gg'
 </script>
 
 <main>
-  <div class="container">Hello {name}!我是popup</div>
+  <!-- <div class="container">Hello {name}!我是popup</div> -->
+  <TransTextarea />
 </main>
 
 <style>
-  .container {
+  main {
     width: 280px;
     min-height: 330px;
-    background: #f8f8f8;
+    background: green;
     /* position: fixed;
     top: 0;
     z-index: 99;

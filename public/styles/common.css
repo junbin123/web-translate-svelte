@@ -32,6 +32,15 @@
 .font-size-16 {
   font-size: 16px;
 }
+.font-size-18 {
+  font-size: 18px;
+}
+.font-size-20 {
+  font-size: 20px;
+}
+.font-size-22 {
+  font-size: 22px;
+}
 .color-main {
   color: #243949;
 }
@@ -120,6 +129,10 @@
   opacity: 0.4;
 }
 
+.hover-color-main:hover {
+  color: #243949;
+}
+
 .padding-8 {
   padding: 8px;
 }
@@ -152,4 +165,8 @@
 }
 .round-6 {
   border-radius: 6px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
