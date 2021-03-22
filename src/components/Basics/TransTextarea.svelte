@@ -11,47 +11,28 @@
   export let transType = 'en2zh'
 
   let sourceTextPre = '' // 保留上一个翻译文本，差量翻译
-  let transLoading = false // 是否处于翻译中
-  let waitPromise = null // 等待中的翻译任务 例子: diffTrans({ sourceList, preSourceList, preTargetList, transType })
   let targetText = ''
+  let dotLoading = false // 是否显示...
 
-  $: if (transLoading) {
-    targetText += '...'
-    console.log('变', transLoading)
-  } else if (targetText.slice(-3) === '...') {
-    targetText = targetText.slice(0, -3)
-    console.log('不变', transLoading)
-  }
+  $: sourceTextTemp = clearText(sourceText) // 代理sourceText用于监听
 
-  // 监听sourceText变化
-  $: if (clearText(sourceText) !== clearText(sourceTextPre) && clearText(sourceText)) {
-    const list = getTransList(sourceText)
-    const listPre = getTransList(sourceTextPre)
-    console.log('监听sourceText')
+  // 监听sourceText变化，请求接口
+  $: watchSourceText(sourceTextTemp)
 
-    const listTrans = []
-    const indexList = []
-    list.forEach((item, index) => {
-      if (item !== listPre[index]) {
-        listTrans.push(item)
-        indexList.push(index)
+  function watchSourceText(str) {
+    if (clearText(sourceText)) {
+      if (clearText(sourceText) !== clearText(sourceTextPre)) {
+        const sourceList = getTransList(sourceText)
+        const preSourceList = getTransList(sourceTextPre)
+        const preTargetList = getTransList(targetText)
+        diffTrans({ sourceList, preSourceList, preTargetList, transType }).then(res => {
+          dotLoading = false
+          targetText = res.join('<br>')
+        })
       }
-    })
-    console.log(list, listPre)
-    console.log(listTrans, indexList)
-    transByDeepl({ source: listTrans, transType }).then(res => {
-      transLoading = false
-      //  origin   getTransList(targetText)
-      //  add res
-
-      console.log(res)
-      // const
-      // transLoading = false
-    })
-
-    // TODO:发现变化，请求翻译接口
-  } else {
-    // targetText = ''
+    } else {
+      handleClear()
+    }
   }
 
   // 请求翻译接口
@@ -59,6 +40,7 @@
     const res = await transByDeepl({ source, transType })
     return res
   }
+
   /**
    * 差量翻译方法
    * @param sourceList 未翻译列表
@@ -98,18 +80,18 @@
   function handleClear() {
     sourceText = ''
     targetText = ''
-    transLoading = false
+    dotLoading = false
   }
   // 输入文本事件
   function handleInput({ target }) {
     sourceTextPre = sourceText
     sourceText = target.value
-    transLoading = true
+    dotLoading = !!clearText(sourceText)
   }
   // 将字符串转化为列表(以换行分割)
   function getTransList(str) {
     const list = str
-      .split(/[\r\n]/)
+      .split(/\r\n|<br>|\n+/)
       .filter(item => item.replace(/\s+/g, ''))
       .map(item => item.trim().replace(/\s+/g, ' '))
     return list
@@ -144,7 +126,12 @@
     {/if}
   </div>
   <div class="target">
-    <div class="target-text padding-8 color-main">{targetText}</div>
+    <div class="target-text padding-8 color-main">
+      {@html targetText}
+      {#if dotLoading}
+        <span>...</span>
+      {/if}
+    </div>
     <div class="target-footer flex-between padding-8">
       <div class="font-size-12 color-99 transition-300 flex cursor-pointer hover-color-main" on:click={handleOpenWeb}>
         <img src={transServiceDict[transService].src} width="16" height="16" alt={transService} />
