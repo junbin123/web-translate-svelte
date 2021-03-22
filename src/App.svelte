@@ -136,11 +136,9 @@
 </script>
 
 <main>
-  <div style="padding:20px">
-    <Popup />
-  </div>
+  <!-- <Popup /> -->
+  <TranlatePop />
 
-  <!-- <TranlatePop /> -->
   <!-- <img src="images/logo.png" alt="logo" id="logo-img" />
   <div id="select-box" class="flex-between">
     <LangSelect
