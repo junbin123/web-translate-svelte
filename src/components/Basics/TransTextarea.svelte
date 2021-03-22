@@ -5,12 +5,14 @@
   import Toast from '../Basics/Toast.svelte'
   import ClipboardJS from '../../utils/clipboard.js'
   import { onMount } from 'svelte'
+  import { transByDeepl } from '../../request/translate'
   export let sourceText = ''
   export let transService = 'google'
   export let transType = 'en2zh'
 
-  let preSourceText = sourceText // 保留上一个翻译文本，差量翻译
-  let transLoading = false // 是否处于翻译请求中
+  let sourceTextPre = '' // 保留上一个翻译文本，差量翻译
+  let transLoading = false // 是否处于翻译中
+  let waitPromise = null // 等待中的翻译任务 例子: diffTrans({ sourceList, preSourceList, preTargetList, transType })
   let targetText = ''
 
   $: if (transLoading) {
@@ -22,12 +24,71 @@
   }
 
   // 监听sourceText变化
-  $: if (clearText(sourceText)) {
+  $: if (clearText(sourceText) !== clearText(sourceTextPre) && clearText(sourceText)) {
     const list = getTransList(sourceText)
-    console.log('监听sourceText', sourceText, list)
+    const listPre = getTransList(sourceTextPre)
+    console.log('监听sourceText')
+
+    const listTrans = []
+    const indexList = []
+    list.forEach((item, index) => {
+      if (item !== listPre[index]) {
+        listTrans.push(item)
+        indexList.push(index)
+      }
+    })
+    console.log(list, listPre)
+    console.log(listTrans, indexList)
+    transByDeepl({ source: listTrans, transType }).then(res => {
+      transLoading = false
+      //  origin   getTransList(targetText)
+      //  add res
+
+      console.log(res)
+      // const
+      // transLoading = false
+    })
+
     // TODO:发现变化，请求翻译接口
   } else {
-    sourceText = ''
+    // targetText = ''
+  }
+
+  // 请求翻译接口
+  async function requestTrans({ source, transType }) {
+    const res = await transByDeepl({ source, transType })
+    return res
+  }
+  /**
+   * 差量翻译方法
+   * @param sourceList 未翻译列表
+   * @param preSourceList 上一个未翻译列表
+   * @param preTargetList 上一个已翻译列表
+   */
+  async function diffTrans({ sourceList = [], preSourceList = [], preTargetList = [], transType }) {
+    if (preSourceList.length !== preTargetList.length) {
+      const res = await requestTrans({ source: sourceList, transType })
+      return res
+    }
+    const indexList = [] // sourceList未翻译下标列表
+    const diffSourceList = [] // 需要翻译的列表,和indexList对应
+    const targetList = new Array(sourceList.length).fill('') // 翻译好的列表
+    sourceList.forEach((item, index) => {
+      const searchIndex = preSourceList.findIndex(item2 => item2 === item)
+      if (searchIndex === -1) {
+        // 没找到,需要翻译
+        indexList.push(index)
+        diffSourceList.push(item)
+      } else {
+        // 找到,压入targetList
+        targetList[index] = preTargetList[searchIndex]
+      }
+    })
+    const res = await requestTrans({ source: diffSourceList, transType }) // 和indexList对应
+    indexList.forEach((item, index) => {
+      targetList[item] = res[index]
+    })
+    return targetList
   }
 
   // 初始化
@@ -41,6 +102,7 @@
   }
   // 输入文本事件
   function handleInput({ target }) {
+    sourceTextPre = sourceText
     sourceText = target.value
     transLoading = true
   }
@@ -71,7 +133,7 @@
   <Toast />
   <div class="source flex">
     <textarea
-      class="source-input padding-8 padding-tb-16"
+      class="source-input padding-8 padding-tb-8"
       value={sourceText}
       use:text_area_resize
       placeholder="输入要翻译的内容"
