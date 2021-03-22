@@ -29,6 +29,23 @@ function serve() {
   }
 }
 
+const pluginsConfig = [
+  svelte({
+    compilerOptions: {
+      dev: !production
+    },
+    preprocess: preprocess()
+  }),
+  resolve({
+    browser: true,
+    dedupe: ['svelte']
+  }),
+  commonjs(),
+  !production && serve(),
+  !production && livereload('public'),
+  production && terser()
+]
+
 export default [
   {
     input: 'src/popup.js',
@@ -38,24 +55,7 @@ export default [
       name: 'app',
       file: 'public/popup/popup.js'
     },
-    plugins: [
-      svelte({
-        compilerOptions: {
-          dev: !production
-        },
-        preprocess: preprocess()
-      }),
-
-      css({ output: 'popup.css' }),
-      resolve({
-        browser: true,
-        dedupe: ['svelte']
-      }),
-      commonjs(),
-      !production && serve(),
-      !production && livereload('public'),
-      production && terser()
-    ],
+    plugins: [...pluginsConfig, css({ output: 'popup.css' })],
     watch: {
       clearScreen: false
     }
@@ -68,22 +68,7 @@ export default [
       name: 'content',
       file: 'public/content/content.js'
     },
-    plugins: [
-      svelte({
-        compilerOptions: {
-          dev: !production
-        }
-      }),
-      css({ output: 'content.css' }),
-      resolve({
-        browser: true,
-        dedupe: ['svelte']
-      }),
-      commonjs(),
-      !production && serve(),
-      !production && livereload('public'),
-      production && terser()
-    ],
+    plugins: [...pluginsConfig, css({ output: 'content.css' })],
     watch: {
       clearScreen: false
     }
@@ -96,22 +81,7 @@ export default [
       name: 'content',
       file: 'public/background/background.js'
     },
-    plugins: [
-      svelte({
-        compilerOptions: {
-          dev: !production
-        }
-      }),
-      css({ output: 'background.css' }),
-      resolve({
-        browser: true,
-        dedupe: ['svelte']
-      }),
-      commonjs(),
-      !production && serve(),
-      !production && livereload('public'),
-      production && terser()
-    ],
+    plugins: [...pluginsConfig, css({ output: 'background.css' })],
     watch: {
       clearScreen: false
     }

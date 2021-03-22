@@ -1,6 +1,5 @@
 <script>
   import TransTextarea from '../Basics/TransTextarea.svelte'
-  export let name = 'gg'
 </script>
 
 <main>
