@@ -1,8 +1,6 @@
 /node_modules/
-/public/
-# /public/background/
-# /public/content/
-# /public/popup/popup.js
-# /public/popup/popup.css
+/public/background/
+/public/content/
+/public/popup/
 
 .DS_Store
