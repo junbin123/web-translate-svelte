@@ -1,4 +1,4 @@
-console.log('我是content.js---')
+console.log('我是content.js9')
 // import { clearText, throttle, getListByLength } from './utils/common.js'
 // import { removeDom, judgeDomVisible, flattenNodes, addChildNode } from './utils/dom.js'
 // import { requestCaiYun } from './request/translate.js'
@@ -139,8 +139,8 @@ console.log('我是content.js---')
 //   targetNodeList.length = 0
 // }
 
-import TestCom from './components/TestCom.svelte'
-const app = new TestCom({
+import TranslatePop from './components/main/TranslatePop.svelte'
+const app = new TranslatePop({
   target: document.body,
   props: {
     name: 'content'

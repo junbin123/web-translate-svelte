@@ -1,28 +1,11 @@
 console.log('我是 popup.js')
 
-// import Popup from './components/main/Popup.svelte'
-// const app = new Popup({
-//   target: document.body,
-//   props: {
-//     name: 'wo2r33ld'
-//   }
-// })
-
-// 页面开发切换
-import App from './App.svelte'
-const app = new App({
+import Popup from './components/main/Popup.svelte'
+const app = new Popup({
   target: document.body,
   props: {
-    name: 'world'
+    name: '我是popup'
   }
 })
-
 export default app
-
-
-
-
-
-
-
 

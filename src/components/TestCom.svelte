@@ -19,7 +19,7 @@
       top: 0;
       width: 100px;
       height: 100px;
-      background: yellow;
+      background: red;
       z-index: 9999;
     }
   }
