@@ -2,5 +2,6 @@
 /public/background/
 /public/content/
 /public/popup/
+/public/index/
 
 .DS_Store

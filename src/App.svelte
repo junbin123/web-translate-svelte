@@ -136,8 +136,8 @@
 </script>
 
 <main>
-  <!-- <Popup /> -->
-  <!-- <TranlatePop /> -->
+  <Popup />
+  <TranlatePop />
 
   <!-- <img src="images/logo.png" alt="logo" id="logo-img" />
   <div id="select-box" class="flex-between">
@@ -164,8 +164,6 @@
 </main>
 
 <style lang="scss">
-  @import '../styles/iconfont.css';
-  @import '../styles/common.css';
   main {
     position: relative;
   }

@@ -48,11 +48,24 @@ const pluginsConfig = [
 
 export default [
   {
+    input: 'src/index.js',
+    output: {
+      sourcemap: false,
+      format: 'iife',
+      name: 'index',
+      file: 'public/index/index.js'
+    },
+    plugins: [...pluginsConfig, css({ output: 'index.css' })],
+    watch: {
+      clearScreen: false
+    }
+  },
+  {
     input: 'src/popup.js',
     output: {
       sourcemap: false,
       format: 'iife',
-      name: 'app',
+      name: 'popup',
       file: 'public/popup/popup.js'
     },
     plugins: [...pluginsConfig, css({ output: 'popup.css' })],
@@ -78,7 +91,7 @@ export default [
     output: {
       sourcemap: false,
       format: 'iife',
-      name: 'content',
+      name: 'background',
       file: 'public/background/background.js'
     },
     plugins: [...pluginsConfig, css({ output: 'background.css' })],
