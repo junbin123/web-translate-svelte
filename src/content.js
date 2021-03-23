@@ -139,11 +139,11 @@ console.log('我是content.js9')
 //   targetNodeList.length = 0
 // }
 
-import TranslatePop from './components/main/TranslatePop.svelte'
-const app = new TranslatePop({
-  target: document.body,
-  props: {
-    name: 'content'
-  }
-})
-export default app
+// import TranslatePop from './components/main/TranslatePop.svelte'
+// const app = new TranslatePop({
+//   target: document.body,
+//   props: {
+//     name: 'content'
+//   }
+// })
+// export default app
