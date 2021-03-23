@@ -147,3 +147,9 @@ const app = new TranslatePop({
   }
 })
 export default app
+
+// setTimeout(() => {
+//   const src = chrome.extension.getURL('/images/logo/google-logo.png')
+  
+//   document.getElementById('test-img').src = 'chrome-extension://nehfbcbhpmaaihakmkmicbaaklgmkami/images/logo/google-logo.png'
+// }, 2000)
