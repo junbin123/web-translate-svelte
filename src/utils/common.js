@@ -81,3 +81,10 @@ export const debounce = (fn, delay = 500) => {
     }, delay)
   }
 }
+
+/**
+ * 获取本地图片绝对路径
+ */
+export const getImgUrl = url => {
+  return chrome?.extension?.getURL(url) ?? url
+}
