@@ -6,7 +6,7 @@
 export const clearText = str => {
   const result = str
     .trim()
-    .replace(/[\n\r]/g, '')
+    .replace(/[\r\n]/g, '')
     .replace(/\s+/g, ' ')
   return result
 }
