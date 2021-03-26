@@ -145,9 +145,12 @@ import TranslatePop from './components/main/TranslatePop.svelte'
 const app = new TranslatePop({
   target: document.body,
   props: {
-    name: 'content'
+    name: 'content',
+    left: '0px',
+    top: '0px'
   }
 })
+
 export default app
 
 let selectText = '' // 选择翻译的文本
@@ -171,3 +174,15 @@ document.addEventListener('mouseup', e => {
     }
   })
 })
+
+transClick.dom.onclick = e => {
+  transClick.hideDom()
+  const top = Math.floor(selectRect.bottom + 6 + document.scrollingElement.scrollTop) + 'px'
+  const left = Math.floor(selectRect.left + document.scrollingElement.scrollLeft - (168 - selectRect.width / 2)) + 'px'
+  app.$set({ left, top })
+}
+
+// 处理页面点击事件
+document.body.onclick = e => {
+  transClick.hideDom()
+}

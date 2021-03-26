@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onMount, afterUpdate } from 'svelte'
   import FormSelect from '../FormSelect.svelte'
   import Toast from '../Basics/Toast.svelte'
   import ClipboardJS from '../../utils/clipboard.js'
@@ -7,6 +7,9 @@
   import { queryStringify } from '../../utils/common.js' // 拖拽方法
   import { baiduOptions, caiyunOptions, deeplOptions, googleOptions, youdaoOptions } from '../../static/options/index' // 翻译语言下拉框数据
   import { transServiceDict } from '../../static/trans'
+
+  export let left = '0px'
+  export let top = '0px'
 
   const clipboard = new ClipboardJS('.icon-copy', {
     text: () => targetText
@@ -31,9 +34,20 @@
   let isPin = false
   let isShow = true
 
-  let boxStyle = {}
+  let boxStyle = {
+    left,
+    top
+  }
   let boxLeft = ''
   let boxTop = ''
+
+  afterUpdate(() => {
+    boxStyle = {
+      ...boxStyle,
+      left,
+      top
+    }
+  })
 
   // 图钉icon点击事件
   function handlePinClick() {
