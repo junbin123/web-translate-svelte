@@ -114,13 +114,13 @@
       <div class="trans-bar font-size-12 color-main flex-between padding-lr-16">
         <div class="trans-bar-left flex-between hover-color-orange">
           <i class="iconfont icon-setting font-size-16" />
-          <span class="trans-bar-left-name">设置</span>
-          <i class="iconfont icon-arrow-right" />
+          <span class="trans-bar-left-name font-size-14">设置</span>
+          <i class="iconfont icon-arrow-right font-size-16" />
         </div>
         <div id="trans-bar-middle" />
         <div class="trans-bar-right flex">
-          <span class="iconfont icon-push-pin padding-lr-8 hover-color-orange" class:icon-push-is-pin={isPin} on:click={handlePinClick} />
-          <span class="iconfont icon-close hover-color-orange" on:click={handleClose} />
+          <span class="iconfont icon-push-pin padding-lr-8 hover-color-orange font-size-16" class:icon-push-is-pin={isPin} on:click={handlePinClick} />
+          <span class="iconfont icon-close hover-color-orange font-size-16" on:click={handleClose} />
         </div>
       </div>
       <div class="trans-lang flex-between padding-lr-16">
@@ -155,8 +155,8 @@
             <span>{transServiceDict[transService].name}</span>
           </div>
           <div>
-            <span class="iconfont icon-copy padding-lr-8 hover-color-orange" on:click={handleCopy} />
-            <span class="iconfont icon-open-web hover-color-orange" on:click={handleOpenWeb} />
+            <span class="iconfont icon-copy padding-lr-8 hover-color-orange font-size-16" on:click={handleCopy} />
+            <span class="iconfont icon-open-web hover-color-orange font-size-16" on:click={handleOpenWeb} />
           </div>
         </div>
       </div>

@@ -21,25 +21,25 @@
 }
 
 .font-size-10 {
-  font-size: 10px;
+  font-size: 10px !important;
 }
 .font-size-12 {
-  font-size: 12px;
+  font-size: 12px !important;
 }
 .font-size-14 {
-  font-size: 14px;
+  font-size: 14px !important;
 }
 .font-size-16 {
-  font-size: 16px;
+  font-size: 16px !important;
 }
 .font-size-18 {
-  font-size: 18px;
+  font-size: 18px !important;
 }
 .font-size-20 {
-  font-size: 20px;
+  font-size: 20px !important;
 }
 .font-size-22 {
-  font-size: 22px;
+  font-size: 22px !important;
 }
 .color-main {
   color: #243949;
@@ -196,4 +196,7 @@
 
 .cursor-pointer {
   cursor: pointer;
+}
+.font-weight-bold {
+  font-weight: bold;
 }

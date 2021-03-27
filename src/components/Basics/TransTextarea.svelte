@@ -122,7 +122,12 @@
       on:input={debounce(handleInput, 600)}
     />
     {#if sourceText}
-      <div class="source-icon"><span class="iconfont icon-close transition-300 font-size-16 color-99 hover-color-main" on:click={handleClear} /></div>
+      <div class="source-icon">
+        <span
+          class="iconfont icon-close transition-300 font-size-16 color-99 hover-color-main"
+          on:click={handleClear}
+        />
+      </div>
     {/if}
   </div>
   <div class="target">
@@ -133,13 +138,21 @@
       {/if}
     </div>
     <div class="target-footer flex-between padding-8">
-      <div class="font-size-12 color-99 transition-300 flex cursor-pointer hover-color-main" on:click={handleOpenWeb}>
+      <div
+        class="font-size-12 color-99 transition-300 flex cursor-pointer hover-color-main"
+        on:click={handleOpenWeb}
+      >
         <img src={transServiceDict[transService].src} width="16" height="16" alt={transService} />
         <span>{transServiceDict[transService].name}</span>
       </div>
       <div class="cursor-pointer">
-        <span class="iconfont icon-copy padding-lr-8 hover-color-main color-99 transition-300 font-size-16" />
-        <span class="iconfont icon-open-web hover-color-main color-99 transition-300 font-size-16" on:click={handleOpenWeb} />
+        <span
+          class="iconfont icon-copy padding-lr-8 hover-color-main color-99 transition-300 font-size-16"
+        />
+        <span
+          class="iconfont icon-open-web hover-color-main color-99 transition-300 font-size-16"
+          on:click={handleOpenWeb}
+        />
       </div>
     </div>
   </div>
@@ -148,7 +161,8 @@
 <style lang="scss" scoped>
   main {
     width: 100%;
-    background: #f5f7f8;
+    // background: #f5f7f8;
+    background: #e9ecf0;
     min-height: 120px;
     overflow: hidden;
     .source {
@@ -157,7 +171,7 @@
       &-input {
         width: calc(100% - 26px);
         min-height: 60px;
-        background: #f5f7f8;
+        background: #e9ecf0;
       }
       &-icon {
         width: 26px;
@@ -169,11 +183,10 @@
     .target {
       min-height: 60px;
       width: 100%;
-      background: #ebedf0;
-      display: flex;
-      flex-direction: column;
+      background: #f5f6f7;
       .target-text {
-        flex: 1;
+        min-height: 30px;
+        word-break: break-all;
       }
       .target-footer {
         height: 30px;

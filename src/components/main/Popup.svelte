@@ -30,7 +30,7 @@
   <div class="padding-lr-16">
     <TransTextarea />
   </div>
-  <div class="btn-box padding-lr-16 cursor-pointer padding-bottom-16">
+  <div class="btn-box padding-lr-16 cursor-pointer padding-bottom-16 font-size-16 font-weight-bold">
     <div class="btn color-white flex-center" on:click={handleTrans}>翻译当前页面</div>
   </div>
 </main>
@@ -39,7 +39,7 @@
   main {
     width: 280px;
     min-height: 330px;
-    background: white;
+    background: #fafafa;
     .header {
       &-left {
         width: 108px;
