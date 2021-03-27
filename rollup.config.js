@@ -5,6 +5,7 @@ import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
 import css from 'rollup-plugin-css-only'
 import preprocess from 'svelte-preprocess'
+// import dev from 'rollup-plugin-dev'
 
 const production = !process.env.ROLLUP_WATCH
 
@@ -43,7 +44,8 @@ const pluginsConfig = [
   commonjs(),
   !production && serve(),
   !production && livereload('public'),
-  production && terser()
+  production && terser(),
+  // dev({})
 ]
 
 export default [

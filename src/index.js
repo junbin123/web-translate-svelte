@@ -8,4 +8,8 @@ const app = new App({
 })
 export default app
 
-
+// 有道api调试
+import { youdaoApiOrigin } from './request/youdao'
+youdaoApiOrigin({}).then(res => {
+  console.log(res)
+})
