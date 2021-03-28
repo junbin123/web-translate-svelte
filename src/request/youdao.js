@@ -9,7 +9,7 @@ const secretKey = 'Es4HiS8rpwSFrV1ol7Lx6hXwkbHg6HbC' // 应用密钥 TODO:通过
  * @param {Array} source 待翻译文本
  * @param {String} transType 原始语言=>目标语言 auto为自动检测
  */
-export const youdaoApi = async ({ source = [], transType = '' }) => {
+export const youdaoApi = async ({ source = [], transType = 'auto2zh-CHS' }) => {
   const sourceStr = source.join('\n')
   console.log({ sourceStr })
   if (!sourceStr) {

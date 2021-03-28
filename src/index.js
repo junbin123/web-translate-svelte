@@ -7,3 +7,8 @@ const app = new App({
   }
 })
 export default app
+
+import { caiYunApi } from './request/caiyun'
+caiYunApi({ source: ['hello', 'world'], transType: 'auto2zh' }).then(res => {
+  console.log('jj', res)
+})
