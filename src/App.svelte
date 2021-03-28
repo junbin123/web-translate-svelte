@@ -1,6 +1,7 @@
 <script>
   import Popup from './components/main/Popup.svelte'
   import TranlatePop from './components/main/TranslatePop.svelte'
+
   // import LangSelect from './components/LangSelect.svelte'
   // import { targetLang, sourceLang } from './store/index.js'
   // import { onMount } from 'svelte'

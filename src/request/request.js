@@ -2,28 +2,21 @@
 import axios from 'axios'
 
 // Create a instance of axios to use the same base url.
-const axiosAPI = axios.create({
-  baseURL: '/youdao' // it's not recommended to have this info here.
-})
+const axiosAPI = axios.create({})
 
 axiosAPI.interceptors.request.use(config => {
-  config.withCredentials = true
   console.log({ config })
+  config.url = 'http://localhost:8080/' + config.url
   return config
 })
 
 // implement a method to execute all the request from here.
 const apiRequest = (method, url, request) => {
-  const headers = {
-    authorization: '',
-    'Access-Control-Allow-Origin': '*'
-  }
   //using the axios instance to perform the request that received from each http method
   return axiosAPI({
     method,
     url,
-    data: request,
-    headers
+    data: request
   })
     .then(res => {
       return Promise.resolve(res.data)

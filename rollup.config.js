@@ -5,7 +5,6 @@ import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
 import css from 'rollup-plugin-css-only'
 import preprocess from 'svelte-preprocess'
-// import dev from 'rollup-plugin-dev'
 
 const production = !process.env.ROLLUP_WATCH
 
@@ -44,9 +43,34 @@ const pluginsConfig = [
   commonjs(),
   !production && serve(),
   !production && livereload('public'),
-  production && terser(),
-  // dev({})
+  production && terser()
 ]
+// 跨域处理
+function proxy() {
+  let started = false
+  return {
+    writeBundle() {
+      if (!started) {
+        started = true
+        // Listen on a specific host via the HOST environment variable
+        var host = process.env.HOST || 'localhost'
+        // Listen on a specific port via the PORT environment variable
+        var port = process.env.PORT || 8080
+
+        var cors_proxy = require('cors-anywhere')
+        cors_proxy
+          .createServer({
+            originWhitelist: [], // Allow all origins
+            requireHeader: ['origin', 'x-requested-with'],
+            removeHeaders: ['cookie', 'cookie2']
+          })
+          .listen(port, host, function () {
+            console.log('Running CORS Anywhere on ' + host + ':' + port)
+          })
+      }
+    }
+  }
+}
 
 export default [
   {
@@ -57,7 +81,7 @@ export default [
       name: 'index',
       file: 'public/index/index.js'
     },
-    plugins: [...pluginsConfig, css({ output: 'index.css' })],
+    plugins: [...pluginsConfig, css({ output: 'index.css' }), !production && proxy()],
     watch: {
       clearScreen: false
     }
