@@ -175,6 +175,7 @@ document.addEventListener('mouseup', e => {
   })
 })
 
+//  翻译按钮点击事件
 transClick.dom.onclick = e => {
   transClick.hideDom()
   const top = Math.floor(selectRect.bottom + 6 + document.scrollingElement.scrollTop) + 'px'
@@ -182,7 +183,7 @@ transClick.dom.onclick = e => {
   app.$set({ left, top })
 }
 
-// 处理页面点击事件
+// 页面点击事件
 document.body.onclick = e => {
   transClick.hideDom()
 }
