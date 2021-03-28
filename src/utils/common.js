@@ -61,6 +61,14 @@ export const queryStringify = (params = {}) => {
 }
 
 /**
+ * 路由对象参数转字符串
+ * @param {*} params 路由参数
+ */
+ export const paramsStringify = (params = {}) => {
+  return Object.keys(params).reduce((p, c, i) => p + `${i === 0 ? '' : '&'}${c}=${params[c]}`, '')
+}
+
+/**
  * 节流函数
  */
 

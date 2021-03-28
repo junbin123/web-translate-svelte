@@ -7,16 +7,16 @@ const axiosAPI = axios.create({})
 axiosAPI.interceptors.request.use(config => {
   console.log({ config })
   config.url = 'http://localhost:8080/' + config.url
+  config.headers['Content-Type'] = 'application/json;charset=UTF-8'
   return config
 })
 
-// implement a method to execute all the request from here.
-const apiRequest = (method, url, request) => {
-  //using the axios instance to perform the request that received from each http method
+const apiRequest = (method, url, request, headers = {}) => {
   return axiosAPI({
     method,
     url,
-    data: request
+    data: request,
+    headers
   })
     .then(res => {
       return Promise.resolve(res.data)
@@ -27,19 +27,19 @@ const apiRequest = (method, url, request) => {
 }
 
 // function to execute the http get request
-const get = (url, request) => apiRequest('get', url, request)
+const get = (url, request, headers) => apiRequest('get', url, request, headers)
 
 // function to execute the http delete request
-const deleteRequest = (url, request) => apiRequest('delete', url, request)
+const deleteRequest = (url, request, headers) => apiRequest('delete', url, request, headers)
 
 // function to execute the http post request
-const post = (url, request) => apiRequest('post', url, request)
+const post = (url, request, headers) => apiRequest('post', url, request, headers)
 
 // function to execute the http put request
-const put = (url, request) => apiRequest('put', url, request)
+const put = (url, request, headers) => apiRequest('put', url, request, headers)
 
 // function to execute the http path request
-const patch = (url, request) => apiRequest('patch', url, request)
+const patch = (url, request, headers) => apiRequest('patch', url, request, headers)
 
 // expose your method to other services or actions
 const API = {
