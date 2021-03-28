@@ -7,12 +7,3 @@ const app = new App({
   }
 })
 export default app
-
-import { youdaoApiOrigin } from './request/youdao'
-youdaoApiOrigin({})
-  .then(res => {
-    console.log('j---', res)
-  })
-  .catch(err => {
-    console.log('j---', err)
-  })
