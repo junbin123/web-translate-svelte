@@ -5,7 +5,7 @@ const token = 'oo00trx4oclspt3nqhfc' // TODO:通过链接获取
  * @param {Array} source 待翻译文本列表
  * @param {String} transType 原始语言=>目标语言 支持auto
  */
-export async function caiYunApi({ source = [], transType = 'auto2zh' }) {
+export async function caiyunApi({ source = [], transType = 'auto2zh' }) {
   const url = 'https://api.interpreter.caiyunai.com/v1/translator'
   const data = {
     source,
@@ -26,3 +26,15 @@ export async function caiYunApi({ source = [], transType = 'auto2zh' }) {
     console.log(err)
   }
 }
+
+// 如何调用？
+// import { caiyunApi } from './request/translate/caiyun'
+// const source = ['This Bloomberg report provided a good summary.']
+// const transType = 'auto2zh'
+// caiyunApi({ source, transType })
+//   .then(res => {
+//     console.log('j---', res)
+//   })
+//   .catch(err => {
+//     console.log('j---', err)
+//   })

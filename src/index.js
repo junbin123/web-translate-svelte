@@ -8,7 +8,7 @@ const app = new App({
 })
 export default app
 
-// import { baiduApi } from './request/baidu'
-// baiduApi({ source: ['你好', '世界'], transType: 'auto2en' }).then(res => {
-//   console.log(res, 'lll')
-// })
+
+
+
+

@@ -46,10 +46,10 @@ export const youdaoApi = async ({ source = [], transType = 'auto2zh-CHS' }) => {
 }
 
 // 如何调用?
-// import { youdaoApiOrigin } from './request/youdao'
-// const source = ['There are many articles', 'In general']
+// import { youdaoApi } from './request/translate/youdao'
+// const source = ['This Bloomberg report provided a good summary.']
 // const transType = 'auto2zh-CHS'
-// youdaoApiOrigin({ source, transType })
+// youdaoApi({ source, transType })
 //   .then(res => {
 //     console.log('j---', res)
 //   })
