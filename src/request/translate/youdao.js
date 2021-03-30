@@ -1,6 +1,6 @@
-import request from './request.js'
-import { paramsStringify } from '../utils/common'
-import SHA256 from '../utils/basic/sha256' // SHA256加密方法
+import request from '../request.js'
+import { paramsStringify } from '../../utils/common'
+import SHA256 from '../../utils/basic/sha256' // SHA256加密方法
 const appKey = '7549b5a073a45b54' // 应用id
 const secretKey = 'Es4HiS8rpwSFrV1ol7Lx6hXwkbHg6HbC' // 应用密钥 TODO:通过链接获取
 

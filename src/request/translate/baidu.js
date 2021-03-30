@@ -1,6 +1,6 @@
-import request from './request.js'
-import MD5 from '../utils/basic/md5'
-import { paramsStringify } from '../utils/common'
+import request from '../request.js'
+import MD5 from '../../utils/basic/md5'
+import { paramsStringify } from '../../utils/common'
 
 const secretKey = 'Z9MEIDLQYiecSXYJNb3_' // 应用密钥 TODO:通过链接获取
 const appid = '20210328000748924' // APPID

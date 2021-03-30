@@ -1,4 +1,4 @@
-import request from './request.js'
+import request from '../request.js'
 const token = 'oo00trx4oclspt3nqhfc' // TODO:通过链接获取
 /**
  *  彩云翻译API
