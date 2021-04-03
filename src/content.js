@@ -147,7 +147,8 @@ const app = new TranslatePop({
   props: {
     name: 'content',
     left: '0px',
-    top: '0px'
+    top: '0px',
+    isShow: false
   }
 })
 

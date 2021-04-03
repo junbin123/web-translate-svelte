@@ -10,6 +10,7 @@
 
   export let left = '0px'
   export let top = '0px'
+  export let isShow = false
 
   const clipboard = new ClipboardJS('.icon-copy', {
     text: () => targetText
@@ -32,7 +33,7 @@
   let targetText = '翻译好赛盖饭的'
 
   let isPin = false
-  let isShow = true
+  
 
   let boxStyle = {
     left,

@@ -1,6 +1,6 @@
 <script>
   import Popup from './components/main/Popup.svelte'
-  import TranlatePop from './components/main/TranslatePop.svelte'
+  import TranslatePop from './components/main/TranslatePop.svelte'
 
   // import LangSelect from './components/LangSelect.svelte'
   // import { targetLang, sourceLang } from './store/index.js'
@@ -138,7 +138,7 @@
 
 <main>
   <Popup />
-  <!-- <TranlatePop /> -->
+  <!-- <TranslatePop /> -->
 
   <!-- <img src="images/logo.png" alt="logo" id="logo-img" />
   <div id="select-box" class="flex-between">
