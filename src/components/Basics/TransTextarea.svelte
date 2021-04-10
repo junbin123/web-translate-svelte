@@ -5,7 +5,6 @@
   import Toast from '../Basics/Toast.svelte'
   import ClipboardJS from '../../utils/clipboard.js'
   import { onMount } from 'svelte'
-  import { transByDeepl } from '../../request/translate'
   import { caiyunApi } from '../../request/translate/caiyun.js'
 
   export let sourceText = ''
