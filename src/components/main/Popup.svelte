@@ -3,8 +3,11 @@
   import LangSelect from '../Basics/LangSelect.svelte'
   import { getImgUrl } from '../../utils/common.js'
   let selectCom = null // LangSelect组件实例
+  let sourceText = '' // 要翻译的文本
+  let transService = 'caiyun' // 翻译服务
+  let transType = 'en2zh' // 语言
   function handleLangChange({ detail }) {
-    console.log(detail)
+    transType = detail.join('2')
   }
 
   function handleClick() {
@@ -28,7 +31,7 @@
     <LangSelect on:handleChange={handleLangChange} bind:this={selectCom} />
   </div>
   <div class="padding-lr-16">
-    <TransTextarea />
+    <TransTextarea bind:sourceText bind:transService bind:transType />
   </div>
   <div class="btn-box padding-lr-16 cursor-pointer padding-bottom-16 font-size-16 font-weight-bold">
     <div class="btn color-white flex-center" on:click={handleTrans}>翻译当前页面</div>

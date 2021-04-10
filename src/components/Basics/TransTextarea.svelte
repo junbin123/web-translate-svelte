@@ -6,8 +6,10 @@
   import ClipboardJS from '../../utils/clipboard.js'
   import { onMount } from 'svelte'
   import { transByDeepl } from '../../request/translate'
+  import { caiyunApi } from '../../request/translate/caiyun.js'
+
   export let sourceText = ''
-  export let transService = 'google'
+  export let transService = 'caiyun'
   export let transType = 'en2zh'
 
   let sourceTextPre = '' // 保留上一个翻译文本，差量翻译
@@ -19,7 +21,16 @@
   // 监听sourceText变化，请求接口
   $: watchSourceText(sourceTextTemp)
 
+  $: watchTransType(transType)
+
+  function watchTransType(str) {
+    console.log('watchTransType')
+    targetText = ''
+    watchSourceText()
+  }
+
   function watchSourceText(str) {
+    console.log('watchSourceText', '--------')
     if (clearText(sourceText)) {
       if (clearText(sourceText) !== clearText(sourceTextPre)) {
         const sourceList = getTransList(sourceText)
@@ -37,8 +48,13 @@
 
   // 请求翻译接口
   async function requestTrans({ source, transType }) {
-    const res = await transByDeepl({ source, transType })
-    return res
+    try {
+      const res = await caiyunApi({ source, transType })
+      return res.target
+    } catch (err) {
+      window.showToast('糟糕！翻译错误')
+      console.log(err, '错误')
+    }
   }
 
   /**
