@@ -33,14 +33,6 @@
     }
   })()
 
-  // afterUpdate(() => {
-  //   boxStyle = {
-  //     ...boxStyle,
-  //     left,
-  //     top
-  //   }
-  // })
-
   // 图钉icon点击事件
   function handlePinClick() {
     console.log('handlePinClick')
