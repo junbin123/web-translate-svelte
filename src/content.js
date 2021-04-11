@@ -145,9 +145,12 @@ import TranslatePop from './components/main/TranslatePop.svelte'
 const app = new TranslatePop({
   target: document.body,
   props: {
-    name: 'content',
-    left: '0px',
-    top: '0px',
+    boxStyle: {
+      left: '0px',
+      right: '0px',
+      position: 'absolute'
+    },
+    sourceText: '',
     isShow: false
   }
 })
@@ -166,8 +169,10 @@ document.addEventListener('mouseup', e => {
       selectText = text
       selectRect = selectInfo.getRangeAt(0).getBoundingClientRect()
       const { pageX, clientY } = e
-      const top = clientY - selectRect.top > selectRect.height / 2 ? selectRect.bottom + 1 : selectRect.top - 27
-      console.log('选择文本：', text, text.length)
+      const top =
+        clientY - selectRect.top > selectRect.height / 2
+          ? selectRect.bottom + 1
+          : selectRect.top - 27
       transClick.showDom({
         left: `${pageX}px`,
         top: `${top + document.scrollingElement.scrollTop}px`
@@ -180,8 +185,28 @@ document.addEventListener('mouseup', e => {
 transClick.dom.onclick = e => {
   transClick.hideDom()
   const top = Math.floor(selectRect.bottom + 6 + document.scrollingElement.scrollTop) + 'px'
-  const left = Math.floor(selectRect.left + document.scrollingElement.scrollLeft - (168 - selectRect.width / 2)) + 'px'
-  app.$set({ left, top })
+  const left =
+    Math.floor(
+      selectRect.left + document.scrollingElement.scrollLeft - (168 - selectRect.width / 2)
+    ) + 'px'
+  console.log('选中文本：', selectText, selectText.length)
+  if (app.$$.ctx[0]) {
+    // isShow
+    app.$set({
+      isShow: true,
+      sourceText: selectText
+    })
+  } else {
+    app.$set({
+      isShow: true,
+      boxStyle: {
+        left,
+        top,
+        position: 'absolute'
+      },
+      sourceText: selectText
+    })
+  }
 }
 
 // 页面点击事件

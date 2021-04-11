@@ -10,7 +10,9 @@ var params = {
 }
 //获取相关CSS属性
 var getCss = function (o, key) {
-  return o.currentStyle ? o.currentStyle[key] : document.defaultView.getComputedStyle(o, false)[key]
+  return o?.currentStyle
+    ? o?.currentStyle?.[key]
+    : document?.defaultView?.getComputedStyle(o, false)?.[key]
 }
 
 //拖拽的实现

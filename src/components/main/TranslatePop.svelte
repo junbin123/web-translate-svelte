@@ -4,60 +4,66 @@
   import LangSelect from '../Basics/LangSelect.svelte'
   import { startDrag } from '../../utils/drag.js' // 拖拽方法
   import { queryStringify } from '../../utils/common.js' // 拖拽方法
-  export let left = '0px'
-  export let top = '0px'
-  export let isShow = false // 是否显示
+  export let isShow = true // 是否显示
   export let sourceText = '' // 要翻译的文本
+  export let boxStyle = {
+    left: '0px',
+    right: '0px',
+    position: 'absolute'
+  }
   let transService = 'caiyun' // 使用的翻译服务
   let isPin = false
-  let boxStyle = {
-    left,
-    top
-  }
-  let boxLeft = ''
-  let boxTop = ''
-
-  afterUpdate(() => {
-    boxStyle = {
-      ...boxStyle,
-      left,
-      top
+  let selectCom = null // LangSelect组件实例
+  let transType = 'en2zh' // 语言
+  $: (() => {
+    if (isShow) {
+      console.log({ isShow })
+      setTimeout(() => {
+        const targetDom = document.getElementById('trans-box')
+        const dragDom = document.getElementById('trans-bar-middle')
+        startDrag(dragDom, targetDom, (x, y) => {
+          boxStyle = {
+            left: x + 'px',
+            top: y + 'px',
+            position: 'fixed'
+          }
+          console.log(x, y, '----')
+        })
+      })
     }
-  })
+  })()
+
+  // afterUpdate(() => {
+  //   boxStyle = {
+  //     ...boxStyle,
+  //     left,
+  //     top
+  //   }
+  // })
 
   // 图钉icon点击事件
   function handlePinClick() {
     console.log('handlePinClick')
+    isPin = !isPin
     if (isPin) {
+      console.log('-----固定')
       boxStyle = {
-        position: 'fixed',
-        left: boxLeft,
-        top: boxTop
+        ...boxStyle,
+        position: 'fixed'
       }
     }
-    isPin = !isPin
   }
   // 关闭icon点击事件
   function handleClose() {
     isShow = false
+    isPin = false
   }
   // 组件点击事件
   function handleBoxClick() {
     selectCom.$$.ctx[9]()
   }
 
-  // 拖拽方法处理
-  onMount(() => {
-    const targetDom = document.getElementById('trans-box')
-    const dragDom = document.getElementById('trans-bar-middle')
-    startDrag(dragDom, targetDom, (x, y) => {
-      boxLeft = x + 'px'
-      boxTop = y + 'px'
-      console.log(x, y, '----')
-    })
-  })
-  let selectCom = null // LangSelect组件实例
-  let transType = 'en2zh' // 语言
+  onMount(() => {})
   function handleLangChange({ detail }) {
     transType = detail.join('2')
   }
@@ -112,11 +118,11 @@
     backdrop-filter: blur(40px);
     border-radius: 4px;
     cursor: pointer;
-    position: absolute;
+    position: relative;
     overflow: hidden;
     box-sizing: border-box;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 1);
     left: 0;
     top: 0;
     z-index: 999;

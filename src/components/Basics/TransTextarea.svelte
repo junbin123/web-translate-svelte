@@ -156,8 +156,15 @@
       <div
         class="font-size-12 color-99 transition-300 flex cursor-pointer hover-color-main"
         on:click={handleOpenWeb}
+        style="height:30px;line-height:30px"
       >
-        <img src={transServiceDict[transService].src} width="16" height="16" alt={transService} />
+        <img
+          src={transServiceDict[transService].src}
+          width="16"
+          height="16"
+          alt={transService}
+          style="margin-top:7px"
+        />
         <span>{transServiceDict[transService].name}</span>
       </div>
       <div class="cursor-pointer">
