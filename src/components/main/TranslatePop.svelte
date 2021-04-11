@@ -1,40 +1,15 @@
 <script>
   import { onMount, afterUpdate } from 'svelte'
-  import FormSelect from '../FormSelect.svelte'
-  import Toast from '../Basics/Toast.svelte'
-  import ClipboardJS from '../../utils/clipboard.js'
+  import TransTextarea from '../Basics/TransTextarea.svelte'
+  import LangSelect from '../Basics/LangSelect.svelte'
   import { startDrag } from '../../utils/drag.js' // 拖拽方法
   import { queryStringify } from '../../utils/common.js' // 拖拽方法
-  import { baiduOptions, caiyunOptions, deeplOptions, googleOptions, youdaoOptions } from '../../static/options/index' // 翻译语言下拉框数据
-  import { transServiceDict } from '../../static/trans'
-
   export let left = '0px'
   export let top = '0px'
-  export let isShow = false
-
-  const clipboard = new ClipboardJS('.icon-copy', {
-    text: () => targetText
-  })
-  clipboard.on('success', e => {
-    window.showToast('已复制译文')
-  })
-
-  const langList = caiyunOptions
-  let sourceLang = 'en'
-  let targetLang = 'zh'
-  let leftSelect
-  let rightSelect
-  let leftShowList = false
-  let rightShowList = false
-
-  let transService = 'google' // 使用的翻译服务
-
-  let sourceText = '要翻译的原文'
-  let targetText = '翻译好赛盖饭的'
-
+  export let isShow = false // 是否显示
+  export let sourceText = '' // 要翻译的文本
+  let transService = 'caiyun' // 使用的翻译服务
   let isPin = false
-  
-
   let boxStyle = {
     left,
     top
@@ -52,7 +27,7 @@
 
   // 图钉icon点击事件
   function handlePinClick() {
-    isPin = !isPin
+    console.log('handlePinClick')
     if (isPin) {
       boxStyle = {
         position: 'fixed',
@@ -60,33 +35,15 @@
         top: boxTop
       }
     }
+    isPin = !isPin
   }
   // 关闭icon点击事件
   function handleClose() {
     isShow = false
   }
-  // 复制点击事件
-  function handleCopy() {}
-  // 跳转网页点击
-  function handleOpenWeb() {
-    window.open('http://fanyi.youdao.com/', '_blank')
-  }
-  // 左边选择器点击
-  function handleLeftClick(e) {
-    rightShowList = false
-  }
-  // 右边选择器点击
-  function handleRightClick(e) {
-    leftShowList = false
-  }
-  // 翻译语言切换
-  function handleSelectChange() {
-    console.log({ sourceLang, targetLang })
-  }
   // 组件点击事件
   function handleBoxClick() {
-    leftShowList = false
-    rightShowList = false
+    selectCom.$$.ctx[9]()
   }
 
   // 拖拽方法处理
@@ -96,17 +53,21 @@
     startDrag(dragDom, targetDom, (x, y) => {
       boxLeft = x + 'px'
       boxTop = y + 'px'
-      console.log(x, y, '00')
+      console.log(x, y, '----')
     })
   })
+  let selectCom = null // LangSelect组件实例
+  let transType = 'en2zh' // 语言
+  function handleLangChange({ detail }) {
+    transType = detail.join('2')
+  }
 </script>
 
 <main>
-  <Toast />
   {#if isShow}
     <div
       id="trans-box"
-      class="select-trans-pop color-main"
+      class="select-trans-pop color-main padding-bottom-16"
       class:select-trans-pop-pin={isPin}
       style={queryStringify(boxStyle)}
       on:click={handleBoxClick}
@@ -120,46 +81,22 @@
         </div>
         <div id="trans-bar-middle" />
         <div class="trans-bar-right flex">
-          <span class="iconfont icon-push-pin padding-lr-8 hover-color-orange font-size-16" class:icon-push-is-pin={isPin} on:click={handlePinClick} />
-          <span class="iconfont icon-close hover-color-orange font-size-16" on:click={handleClose} />
+          <span
+            class="iconfont icon-push-pin padding-lr-8 hover-color-orange font-size-16"
+            class:icon-push-is-pin={isPin}
+            on:click={handlePinClick}
+          />
+          <span
+            class="iconfont icon-close hover-color-orange font-size-16"
+            on:click={handleClose}
+          />
         </div>
       </div>
-      <div class="trans-lang flex-between padding-lr-16">
-        <FormSelect
-          on:handleClick={handleLeftClick}
-          options={langList}
-          on:handleChange={handleSelectChange}
-          bind:value={sourceLang}
-          bind:this={leftSelect}
-          bind:showList={leftShowList}
-        />
-        <i class="trans-lang-middle iconfont icon-arrow-compare flex-center hover-color-orange" />
-        <FormSelect
-          on:handleClick={handleRightClick}
-          options={langList}
-          on:handleChange={handleSelectChange}
-          bind:value={targetLang}
-          bind:this={rightSelect}
-          bind:showList={rightShowList}
-        />
+      <div class="padding-16 padding-bottom-16">
+        <LangSelect on:handleChange={handleLangChange} bind:this={selectCom} />
       </div>
-      <div class="padding-lr-16 padding-tb-8">
-        <span class="color-99 font-size-10 leading-8">原文</span>
-        <div class="font-size-14 color-33">{sourceText}</div>
-      </div>
-      <div class="trans-target padding-lr-16">
-        <span class="color-99 font-size-10 leading-8">译文</span>
-        <div class="font-size-14">{targetText}</div>
-        <div class="trans-footer flex-between">
-          <div class="font-size-12 color-66 transition-300 flex" on:click={handleOpenWeb}>
-            <img src={transServiceDict[transService].src} width="16" height="16" alt={transService} />
-            <span>{transServiceDict[transService].name}</span>
-          </div>
-          <div>
-            <span class="iconfont icon-copy padding-lr-8 hover-color-orange font-size-16" on:click={handleCopy} />
-            <span class="iconfont icon-open-web hover-color-orange font-size-16" on:click={handleOpenWeb} />
-          </div>
-        </div>
+      <div class="padding-lr-16">
+        <TransTextarea bind:sourceText bind:transService bind:transType />
       </div>
     </div>
   {/if}
@@ -168,7 +105,7 @@
 <style lang="scss" scoped>
   .select-trans-pop-pin {
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2) !important;
-    background: rgba(255, 255, 255, 0.5) !important;
+    background: rgba(255, 255, 255, 0.7) !important;
   }
   .select-trans-pop {
     width: 320px;
@@ -179,7 +116,7 @@
     overflow: hidden;
     box-sizing: border-box;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
-    background: #fafafa;
+    background: rgba(255, 255, 255, 0.9);
     left: 0;
     top: 0;
     z-index: 999;
@@ -210,16 +147,6 @@
           color: #ff6239;
         }
       }
-    }
-    .trans-lang {
-      width: 280px;
-    }
-    .trans-target {
-      background: rgba(255, 255, 255, 0.4);
-    }
-    .trans-footer {
-      margin-top: 8px;
-      height: 30px;
     }
   }
 </style>

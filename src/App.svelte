@@ -137,8 +137,8 @@
 </script>
 
 <main>
-  <Popup />
-  <!-- <TranslatePop /> -->
+  <!-- <Popup /> -->
+  <TranslatePop />
 
   <!-- <img src="images/logo.png" alt="logo" id="logo-img" />
   <div id="select-box" class="flex-between">
