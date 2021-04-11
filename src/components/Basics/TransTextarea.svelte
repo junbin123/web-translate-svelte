@@ -15,18 +15,10 @@
   let targetText = ''
   let dotLoading = false // 是否显示...
 
-  $: sourceTextTemp = clearText(sourceText) // 代理sourceText用于监听
+  $: sourceTextTemp = clearText(sourceText) + transType // 代理sourceText用于监听
 
   // 监听sourceText变化，请求接口
   $: watchSourceText(sourceTextTemp)
-
-  $: watchTransType(transType)
-
-  function watchTransType(str) {
-    console.log('watchTransType')
-    targetText = ''
-    watchSourceText()
-  }
 
   function watchSourceText(str) {
     console.log('watchSourceText', '--------')

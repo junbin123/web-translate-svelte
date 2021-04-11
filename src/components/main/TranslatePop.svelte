@@ -47,8 +47,7 @@
   }
   // 关闭icon点击事件
   function handleClose() {
-    isShow = false
-    isPin = false
+    initCom()
   }
   // 组件点击事件
   function handleBoxClick() {
@@ -58,6 +57,18 @@
   onMount(() => {})
   function handleLangChange({ detail }) {
     transType = detail.join('2')
+  }
+  // 组件初始化
+  function initCom() {
+    isShow = false
+    isPin = false
+    boxStyle = {
+      left: '0px',
+      right: '0px',
+      position: 'absolute'
+    }
+    sourceText = ''
+    transType = 'en2zh'
   }
 </script>
 
