@@ -1,12 +1,10 @@
 // Api.js
 import axios from 'axios'
-
-// Create a instance of axios to use the same base url.
 const axiosAPI = axios.create({})
 
 axiosAPI.interceptors.request.use(config => {
   console.log({ config })
-  config.url = 'http://localhost:8080/' + config.url
+  // config.url = 'http://localhost:8080/' + config.url
   config.headers['Content-Type'] = 'application/json;charset=UTF-8'
   return config
 })

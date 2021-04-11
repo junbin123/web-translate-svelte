@@ -1,7 +1,9 @@
 <script>
   import TransTextarea from '../Basics/TransTextarea.svelte'
   import LangSelect from '../Basics/LangSelect.svelte'
-  import { getImgUrl } from '../../utils/common.js'
+  import { getImgUrl, getBrowserInfo } from '../../utils/common.js'
+  import StatApi from '../../request/stat' // 数据统计
+  const statApi = new StatApi()
   let selectCom = null // LangSelect组件实例
   let sourceText = '' // 要翻译的文本
   let transService = 'caiyun' // 翻译服务
@@ -13,7 +15,26 @@
   function handleClick() {
     selectCom.$$.ctx[9]()
   }
-  function handleTrans() {}
+  function handleTrans() {
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      let message = { transType }
+      chrome.tabs.sendMessage(tabs[0].id, message, res => {
+        console.log('页面的数据', res)
+        const { canTrans = false, currentUrl = '' } = res
+        if (canTrans && currentUrl) {
+          const data = {
+            url: currentUrl,
+            browserInfo: getBrowserInfo(),
+            createTime: new Date().getTime()
+          }
+          statApi.transUrl(data)
+        }
+        setTimeout(() => {
+          window.close()
+        }, 100)
+      })
+    })
+  }
 </script>
 
 <main on:click={handleClick}>
@@ -47,8 +68,6 @@
       &-left {
         width: 108px;
         height: 30px;
-      }
-      &-right {
       }
     }
     .btn-box {

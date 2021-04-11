@@ -96,3 +96,21 @@ export const debounce = (fn, delay = 500) => {
 export const getImgUrl = url => {
   return chrome?.extension?.getURL(url) ?? url
 }
+
+// 获取用户浏览器信息
+export const getBrowserInfo = () => {
+  const { platform, appName, languages, language, vendor, userAgent } = navigator
+  const { height: screenHeight, width: screenWidth } = window.screen
+  const browserInfo = {
+    platform, // 客户端系统
+    appName, // 浏览器名称
+    language, // 浏览器默认语言
+    languages,
+    vendor, // 浏览器厂家信息
+    userAgent, // 返回浏览器及版本信息
+    screenHeight, // 屏幕高度
+    screenWidth // 屏幕宽度
+  }
+  return browserInfo
+}
+

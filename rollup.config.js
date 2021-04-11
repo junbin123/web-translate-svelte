@@ -5,8 +5,8 @@ import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
 import css from 'rollup-plugin-css-only'
 import preprocess from 'svelte-preprocess'
-
 const production = !process.env.ROLLUP_WATCH
+console.log({ production })
 
 function serve() {
   let server
@@ -81,7 +81,7 @@ export default [
       name: 'index',
       file: 'public/index/index.js'
     },
-    plugins: [...pluginsConfig, css({ output: 'index.css' }), proxy({ port: 8080 })],
+    plugins: [...pluginsConfig, css({ output: 'index.css' }), !production && proxy({ port: 8080 })],
     watch: {
       clearScreen: false
     }
@@ -94,7 +94,7 @@ export default [
       name: 'popup',
       file: 'public/popup/popup.js'
     },
-    plugins: [...pluginsConfig, css({ output: 'popup.css' }), proxy({ port: 8081 })],
+    plugins: [...pluginsConfig, css({ output: 'popup.css' }), !production && proxy({ port: 8081 })],
     watch: {
       clearScreen: false
     }
@@ -107,7 +107,11 @@ export default [
       name: 'content',
       file: 'public/content/content.js'
     },
-    plugins: [...pluginsConfig, css({ output: 'content.css' }), proxy({ port: 8082 })],
+    plugins: [
+      ...pluginsConfig,
+      css({ output: 'content.css' }),
+      !production && proxy({ port: 8082 })
+    ],
     watch: {
       clearScreen: false
     }
@@ -120,7 +124,11 @@ export default [
       name: 'background',
       file: 'public/background/background.js'
     },
-    plugins: [...pluginsConfig, css({ output: 'background.css' }), proxy({ port: 8083 })],
+    plugins: [
+      ...pluginsConfig,
+      css({ output: 'background.css' }),
+      !production && proxy({ port: 8083 })
+    ],
     watch: {
       clearScreen: false
     }
