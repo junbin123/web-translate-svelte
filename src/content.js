@@ -92,8 +92,14 @@ window.onload = () => {
   )
 }
 // 接收popup的值
+let isTrans = false
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-  fullTrans({ request })
   let currentUrl = `${document.location.origin}${document.location.pathname}`
-  sendResponse({ canTrans: true, currentUrl })
+  if (isTrans) {
+    sendResponse({ canTrans: false, currentUrl, msg: '当前页面翻译中' })
+    return
+  }
+  fullTrans({ ...request })
+  isTrans = true
+  sendResponse({ canTrans: true, currentUrl, msg: '开始翻译' })
 })

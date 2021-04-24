@@ -84,9 +84,10 @@
     >
       <div class="trans-bar font-size-12 color-main flex-between padding-lr-16">
         <div class="trans-bar-left flex-between hover-color-orange">
-          <i class="iconfont icon-setting font-size-16" />
+          <!-- TODO:先注释，没时间弄 -->
+          <!-- <i class="iconfont icon-setting font-size-16" />
           <span class="trans-bar-left-name font-size-14">设置</span>
-          <i class="iconfont icon-arrow-right font-size-16" />
+          <i class="iconfont icon-arrow-right font-size-16" /> -->
         </div>
         <div id="trans-bar-middle" />
         <div class="trans-bar-right flex">

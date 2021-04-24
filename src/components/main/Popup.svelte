@@ -43,9 +43,10 @@
     <div
       class="header-right font-size-14 flex-between color-99 hover-color-main transition-300 cursor-pointer"
     >
-      <i class="iconfont icon-setting" />
+      <!-- TODO:先注释，没时间弄 -->
+      <!-- <i class="iconfont icon-setting" />
       <span class="trans-bar-left-name">设置</span>
-      <i class="iconfont icon-arrow-right" />
+      <i class="iconfont icon-arrow-right" /> -->
     </div>
   </div>
   <div class="padding-16 padding-bottom-16">
