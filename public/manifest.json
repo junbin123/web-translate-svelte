@@ -17,7 +17,7 @@
   "content_scripts": [
     {
       "js": ["content/content.js"],
-      "css": ["content/content.css", "global.css", "styles/common.css", "styles/iconfont.css"],
+      "css": ["content/content.css", "styles/common.css", "styles/iconfont.css"],
       "run_at": "document_idle",
       "matches": ["<all_urls>"]
     }

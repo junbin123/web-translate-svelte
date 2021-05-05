@@ -37,7 +37,7 @@
   }
 </script>
 
-<main on:click={handleClick}>
+<main on:click={handleClick} class="web-translate-svelte-popup">
   <div class="header flex-between padding-16">
     <img class="header-left" src={getImgUrl('./images/common/logo-header.png')} alt="logo" />
     <div
@@ -61,9 +61,9 @@
 </main>
 
 <style lang="scss" scoped>
-  main {
+  .web-translate-svelte-popup {
     width: 280px;
-    min-height: 330px;
+    height: 330px;
     background: #fafafa;
     .header {
       &-left {

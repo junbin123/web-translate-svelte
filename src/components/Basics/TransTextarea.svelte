@@ -186,6 +186,14 @@
         width: calc(100% - 26px);
         min-height: 60px;
         background: #e9ecf0;
+        border: none;
+        outline: none;
+        resize: none;
+        color: #333;
+        font-size: 14px;
+        border-radius: 0;
+        box-sizing: border-box;
+        margin: 0;
       }
       &-icon {
         width: 26px;
@@ -207,4 +215,17 @@
       }
     }
   }
+
+  // textarea {
+  //   border: none;
+  //   outline: none;
+  //   resize: none;
+  //   background: white;
+  //   padding: 0;
+  //   margin: 0;
+  //   color: #333;
+  //   font-size: 14px;
+  //   border-radius: 0;
+  //   box-sizing: border-box;
+  // }
 </style>
