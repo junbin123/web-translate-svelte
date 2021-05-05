@@ -118,6 +118,7 @@
     background: rgba(255, 255, 255, 0.7) !important;
   }
   .select-trans-pop {
+    font-family: 'PingFangSC-Regular', 'MicrosoftSansSerif';
     width: 320px;
     backdrop-filter: blur(40px);
     border-radius: 4px;
@@ -132,7 +133,8 @@
     z-index: 999;
     .trans-bar {
       height: 36px;
-      width: 100%;
+      width: 320px;
+      box-sizing: border-box;
       .trans-bar-left {
         line-height: 36px;
         .trans-bar-left-name {
@@ -142,8 +144,8 @@
       }
       #trans-bar-middle {
         height: 100%;
-        flex: 1;
         cursor: move;
+        width: 240px;
       }
       .trans-bar-right {
         .icon-push-pin {
