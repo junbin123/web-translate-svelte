@@ -1,25 +1,27 @@
 <script>
-  import iconClose from "../static/images/icon/icon-close.png";
+  import clickClose from "../static/images/click-close.png";
+  import clickLogo from "../static/images/click-logo.png";
   import { onMount } from "svelte";
 
-  export let name = "hhh";
+  // export let name = "hhh";
 
   onMount(() => {
     console.log("组件onMonut");
   });
+  let showPop = false;
+  function handleClick() {
+    showPop = !showPop;
+  }
 </script>
 
 <main>
   <div class="container">
-    我是组件{name}
-    <div class="container-box flex">
-      <div class="tool-item">不翻译了</div>
-      <div class="tool-item">
-        
-
-      </div>
-
-      <img src={iconClose} alt="logo" class="tool-item" />
+    <div class="click-box" on:click={handleClick}>
+      {#if showPop}
+        <img src={clickClose} alt="close" class="click-item" />
+      {:else}
+        <img src={clickLogo} alt="logo" class="click-item" />
+      {/if}
     </div>
   </div>
 </main>
@@ -29,17 +31,24 @@
     position: fixed;
     right: 30px;
     z-index: 9999;
-    width: 252px;
-    height: 46px;
     cursor: pointer;
     background-image: linear-gradient(-44deg, #243949 0%, #517fa4 100%);
     bottom: 30px;
     border: 1px solid #eee;
     border-radius: 8px;
-    color: #fff;
   }
-  .tool-item {
-    width: 24px;
-    height: 24px;
+
+  .click-box {
+    position: fixed;
+    right: 30px;
+    z-index: 9999;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    bottom: 30px;
+  }
+  .click-item {
+    width: 36px;
+    height: 36px;
   }
 </style>
