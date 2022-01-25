@@ -1,0 +1,45 @@
+{
+  "manifest_version": 2,
+  "name": "web-translate",
+  "version": "0.0.1",
+  "description": "一款简单高效的网页翻译插件",
+  "permissions": [
+    "tabs",
+    "storage",
+    "declarativeContent",
+    "activeTab",
+    "<all_urls>"
+  ],
+  "icons": {
+    "32": "images/logo32.png",
+    "48": "images/logo48.png",
+    "128": "images/logo128.png"
+  },
+  "browser_action": {
+    "default_icon": "images/logo48.png"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "content/content.js"
+      ],
+      "css": [
+        "content/content.css"
+      ],
+      "run_at": "document_idle",
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "background": {
+    "scripts": [
+      "background/background.js"
+    ],
+    "persistent": false
+  },
+  "web_accessible_resources": [
+    "images/*"
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://cdn.jsdelivr.net; object-src 'self'"
+}
