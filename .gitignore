@@ -1,7 +1,2 @@
-/node_modules/
-/public/background/
-/public/content/
-/public/popup/
-/public/index/
-
+/node_modules
 .DS_Store

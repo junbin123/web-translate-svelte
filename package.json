@@ -1,14 +1,14 @@
 {
   "name": "svelte-app",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public"
+    "dev": "rollup -c -w"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
     "node-sass": "^5.0.0",
     "rollup": "^2.3.4",
@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "sirv-cli": "^1.0.0",
+    "cors": "^2.8.5",
     "cors-anywhere": "^0.4.3",
-    "cors": "^2.8.5"
+    "sirv-cli": "^1.0.0"
   }
 }
