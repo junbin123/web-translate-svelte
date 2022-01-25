@@ -14,7 +14,7 @@ chrome.tabs.onActivated.addListener((tab) => {
   });
 });
 
-console.log(chrome.browserAction, "==3");
+
 // 监听扩展icon的点击
 chrome.browserAction.onClicked.addListener(function (tab) {
   console.log("点击扩展按钮", tab);

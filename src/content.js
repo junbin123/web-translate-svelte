@@ -1,20 +1,5 @@
 import { fullTrans } from "./utils/full_translate.js";
-import TranslatePop from "./components/main/TranslatePop.svelte";
 console.log("我是content.js");
-const app = new TranslatePop({
-  target: document.body,
-  props: {
-    boxStyle: {
-      left: "0px",
-      right: "0px",
-      position: "absolute",
-    },
-    sourceText: "",
-    isShow: false,
-  },
-});
-
-export default app;
 
 let isTrans = false;
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
