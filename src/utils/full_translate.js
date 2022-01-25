@@ -1,4 +1,4 @@
-import { flattenNodes } from './content/common.js'
+import { flattenNodes } from './common.js'
 let nodeList = [] // 要翻译的所有元素
 let textList = [] // 要翻译的所有文本列表
 let transIndex = 0 // 翻译到哪个index

@@ -1,0 +1,231 @@
+.flex {
+  display: flex;
+}
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.font-size-10 {
+  font-size: 10px !important;
+}
+.font-size-12 {
+  font-size: 12px !important;
+}
+.font-size-14 {
+  font-size: 14px !important;
+}
+.font-size-16 {
+  font-size: 16px !important;
+}
+.font-size-18 {
+  font-size: 18px !important;
+}
+.font-size-20 {
+  font-size: 20px !important;
+}
+.font-size-22 {
+  font-size: 22px !important;
+}
+.color-main {
+  color: #243949;
+}
+.color-secondary {
+  color: #517fa4;
+}
+.color-orange {
+  color: #ff6239;
+}
+.color-grey {
+  color: #9bb1c8;
+}
+.color-light-grey {
+  color: #e9ecf0;
+}
+.color-33 {
+  color: #333;
+}
+.color-66 {
+  color: #666;
+}
+.color-99 {
+  color: #999;
+}
+.color-cc {
+  color: #ccc;
+}
+.color-white {
+  color: #fff;
+}
+
+.bg-color-main {
+  background: #243949;
+}
+.bg-color-secondary {
+  background: #517fa4;
+}
+.bg-color-orange {
+  background: #ff6239;
+}
+.bg-color-grey {
+  background: #9bb1c8;
+}
+.bg-color-light-grey {
+  background: #e9ecf0;
+}
+.bg-color-33 {
+  background: #333;
+}
+.bg-color-66 {
+  background: #666;
+}
+.bg-color-99 {
+  background: #999;
+}
+.bg-color-cc {
+  background: #ccc;
+}
+
+.leading-4 {
+  line-height: 1;
+}
+.leading-5 {
+  line-height: 1.25;
+}
+.leading-6 {
+  line-height: 1.5;
+}
+.leading-7 {
+  line-height: 1.75;
+}
+.leading-8 {
+  line-height: 2;
+}
+
+.transition-300 {
+  transition: all 0.3s ease-in-out;
+}
+.transition-200 {
+  transition: all 0.2s ease-in-out;
+}
+.hover-color-orange {
+  transition: all 0.3s ease-in-out;
+}
+.hover-color-orange:hover {
+  color: #ff6239;
+}
+.hover-color-orange:active {
+  opacity: 0.4;
+}
+
+.hover-color-main:hover {
+  color: #243949;
+}
+
+.padding-8 {
+  padding: 8px;
+}
+.padding-lr-8 {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.padding-tb-8 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.padding-left-8 {
+  padding-left: 8px;
+}
+.padding-right-8 {
+  padding-right: 8px;
+}
+.padding-bottom-8 {
+  padding-bottom: 8px;
+}
+.padding-top-8 {
+  padding-top: 8px;
+}
+
+.padding-16 {
+  padding: 16px;
+}
+.padding-lr-16 {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.padding-tb-16 {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+.padding-top-16 {
+  padding-top: 16px;
+}
+.padding-bottom-16 {
+  padding-bottom: 16px;
+}
+.padding-left-16 {
+  padding-left: 16px;
+}
+.padding-right-16 {
+  padding-right: 16px;
+}
+
+.round-none {
+  border-radius: 0px;
+}
+.round-4 {
+  border-radius: 4px;
+}
+.round-6 {
+  border-radius: 6px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+.font-weight-bold {
+  font-weight: bold;
+}
+
+
+/* 页面翻译动画样式 */
+.content-class {
+  display: inline-block;
+  color: rgba(0, 0, 0, 0);
+  background-image: linear-gradient(-225deg, #231557 0%, #44107a 29%, #ff1361 67%, #fff800 100%);
+  text-shadow: none;
+  border-radius: 4px;
+  animation: animateGlow 2s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+.content-class-complete {
+  display: inline-block;
+}
+.content-class-complete:hover {
+  box-shadow: 0 0 0 1px #f09819;
+}
+@keyframes animateGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
