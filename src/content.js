@@ -1,5 +1,5 @@
 import { fullTrans } from "./utils/full_translate.js";
-console.log("我是content.js");
+console.log("我是content.js2");
 
 let isTrans = false;
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
