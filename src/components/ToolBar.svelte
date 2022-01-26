@@ -1,9 +1,9 @@
 <script>
   import clickClose from "../static/images/click-close.png";
   import clickLogo from "../static/images/click-logo.png";
+  import SettingPop from "./SettingPop.svelte";
+  import "../styles/common.css"
   import { onMount } from "svelte";
-
-  // export let name = "hhh";
 
   onMount(() => {
     console.log("组件onMonut");
@@ -22,6 +22,9 @@
       {:else}
         <img src={clickLogo} alt="logo" class="click-item" />
       {/if}
+    </div>
+    <div id="pop-box">
+      <SettingPop />
     </div>
   </div>
 </main>
@@ -50,5 +53,12 @@
   .click-item {
     width: 36px;
     height: 36px;
+  }
+  #pop-box {
+    position: fixed;
+    bottom: 68px;
+    right: 68px;
+    z-index: 9999;
+    cursor: pointer;
   }
 </style>
