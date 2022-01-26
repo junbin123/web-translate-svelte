@@ -35,9 +35,9 @@
       </div>
     </div>
 
-    <div class="button-box">
-      <button class="button-left flex-center"> 不翻译了 </button>
-      <button class="button-right flex-center"> 重新翻译 </button>
+    <div class="button-box flex-between">
+      <div class="button-left flex-center">不翻译了</div>
+      <div class="button-right flex-center">重新翻译</div>
     </div>
   </div>
 </main>
@@ -45,18 +45,18 @@
 <style scoped>
   .container {
     width: 300px;
-    height: 180px;
     background: #232e3b;
-    border: 1px solid #e8e8e8;
+    border: 1px solid #ddd;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    padding: 20px 0;
+    padding-top: 20px;
+    -moz-user-select: none; /* 火狐 */
+    -webkit-user-select: none; /* 谷歌 */
+    -ms-user-select: none; /* IE */
+    user-select: none;
+    overflow: hidden;
   }
-  .color-box {
-    background: brown;
-    width: 30px;
-    height: 30px;
-  }
+
   .cell-item {
     color: #a0adbf;
     height: 30px;
@@ -67,18 +67,42 @@
     width: 67px;
     padding-right: 8px;
   }
-  .cell-right {
-  }
-  .dot-item {
-    width: 18px;
-    height: 18px;
-    background: #243949;
-    border-radius: 50%;
-  }
+
   .color-item {
     width: 20px;
     height: 20px;
     border-radius: 50%;
     margin-right: 10px;
+  }
+  .button-box {
+    width: 300px;
+    height: 66px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    background: rgba(20, 28, 34, 0.4);
+    box-shadow: 0 -1px 0 0 #38414d;
+    margin-top: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #d8d8d8;
+  }
+  .button-left {
+    width: 120px;
+    height: 36px;
+    background: #243949;
+    border-radius: 4px;
+  }
+
+  .button-left:hover {
+    background: #2a4355;
+  }
+  .button-right {
+    width: 120px;
+    height: 36px;
+    background: #ff6239;
+    border-radius: 4px;
+  }
+  .button-right:hover {
+    background: #fa643e;
   }
 </style>

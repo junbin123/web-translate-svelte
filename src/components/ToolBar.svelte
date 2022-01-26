@@ -2,7 +2,6 @@
   import clickClose from "../static/images/click-close.png";
   import clickLogo from "../static/images/click-logo.png";
   import SettingPop from "./SettingPop.svelte";
-  import "../styles/common.css"
   import { onMount } from "svelte";
 
   onMount(() => {
@@ -23,7 +22,10 @@
         <img src={clickLogo} alt="logo" class="click-item" />
       {/if}
     </div>
-    <div id="pop-box">
+    <div
+      id="pop-box"
+      class={`transition-300 ${showPop ? "show-pop" : "hide-pop"}`}
+    >
       <SettingPop />
     </div>
   </div>
@@ -60,5 +62,12 @@
     right: 68px;
     z-index: 9999;
     cursor: pointer;
+    transform-origin: right bottom;
+  }
+  .show-pop {
+    transform: scale(1);
+  }
+  .hide-pop {
+    transform: scale(0);
   }
 </style>

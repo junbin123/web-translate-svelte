@@ -1,61 +1,84 @@
 <script>
-  import { onMount } from "svelte";
+  import FormSelect from "./FormSelect.svelte";
+  import iconRight from "../static/images/icon-right.png";
+  import { createEventDispatcher } from "svelte";
+  const dispatch = createEventDispatcher();
+  export let langList = [
+    {
+      name: "中文",
+      value: "zh",
+    },
+    {
+      name: "英语",
+      value: "en",
+    },
+    {
+      name: "日语",
+      value: "ja",
+    },
+  ];
+  export let value = ["en", "zh"];
 
-  onMount(() => {
-    console.log("组件onMonut");
-  });
+  let leftShowList = false;
+  let rightShowList = false;
+  function handleLeftClick() {
+    rightShowList = false;
+  }
+  function handleRightClick() {
+    leftShowList = false;
+  }
+  function handleChangeLeft({ detail }) {
+    if (value[1] === detail.value) {
+      value[1] = value[0];
+    }
+    value[0] = detail.value;
+    dispatch("handleChange", value);
+  }
+  function handleChangeRight({ detail }) {
+    if (value[0] === detail.value) {
+      value[0] = value[1];
+    }
+    value[1] = detail.value;
+    dispatch("handleChange", value);
+  }
+
+  // function handleSwitch() {
+  //   const temp = value[0];
+  //   value[0] = value[1];
+  //   value[1] = temp;
+  //   dispatch("handleChange", value);
+  // }
+  function handleClick() {
+    leftShowList = false;
+    rightShowList = false;
+  }
 </script>
 
-<main>
-  <div class="container">
-    <div class="cell-item flex align-center">
-      <div class="cell-left font-size-12 flex justify-end">语言</div>
-      <div class="cell-right">a;fjsdg</div>
-    </div>
-    <div class="cell-item flex align-center">
-      <div class="cell-left font-size-12 flex justify-end">背景色</div>
-      <div class="cell-right">
-        <div class="color-box" />
-      </div>
-    </div>
-
-    <div class="button-box">
-      <button class="button-left flex-center">
-        不翻译了
-      </button>
-      <button class="button-right flex-center">
-        重新翻译
-      </button>
-    </div>
-  </div>
+<main class="container flex-between" on:click={handleClick}>
+  <FormSelect
+    on:handleClick={handleLeftClick}
+    on:handleChange={handleChangeLeft}
+    options={langList}
+    value={value[0]}
+    bind:showList={leftShowList}
+  />
+  <img src={iconRight} alt="icon" class="middle-icon" />
+  <FormSelect
+    on:handleClick={handleRightClick}
+    on:handleChange={handleChangeRight}
+    options={langList}
+    value={value[1]}
+    bind:showList={rightShowList}
+  />
 </main>
 
 <style scoped>
   .container {
-    width: 300px;
-    height: 180px;
-    background: #fafafa;
-    border: 1px solid #e8e8e8;
-    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    padding: 20px 0;
-  }
-  .color-box {
-    background: brown;
-    width: 30px;
+    width: 180px;
     height: 30px;
   }
-  .cell-item{
-    height: 30px;
+  .middle-icon {
+    width: 20px;
+    height: 20px;
   }
-  .cell-left{
-    width: 67px;
-    padding-right: 6px;
-    color: #243949;
-  }
-  .cell-right{
-
-  }
-
-
 </style>
