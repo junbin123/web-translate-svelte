@@ -3,11 +3,27 @@
   import clickLogo from "../static/images/click-logo.png";
   import SettingPop from "./SettingPop.svelte";
   import { onMount } from "svelte";
+  let showPop = false;
+
+  document.body.addEventListener(
+    "click",
+    function ({ target }) {
+      if (
+        target.closest("#web-translate-svelte") &&
+        !target.className.split(" ").find((item) => item === "click-item")
+      ) {
+        showPop = false;
+      }
+    },
+    { passive: true }
+  );
+
+  //使用
 
   onMount(() => {
     console.log("组件onMonut");
   });
-  let showPop = false;
+
   function handleClick() {
     showPop = !showPop;
   }
@@ -29,7 +45,7 @@
 </script>
 
 <main>
-  <div class="container web-translate-svelte">
+  <div class="container" id="web-translate-svelte">
     <div class="click-box" on:click={handleClick}>
       {#if showPop}
         <img src={clickClose} alt="close" class="click-item" />

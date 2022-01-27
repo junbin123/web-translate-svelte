@@ -168,6 +168,10 @@ export function filterDom({ element, url = window.location.host }) {
     return false;
   }
 
+  if (element.id === "web-translate-svelte") {
+    return false;
+  }
+
   const filterTagList = ["SCRIPT", "CODE", "NOSCRIPT", "STYLE"]; // 需要过滤的标签
   if (filterTagList.includes(element.nodeName)) {
     return false;

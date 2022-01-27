@@ -10,12 +10,12 @@
   });
 
   const colorList = [
-    { color: "#FDDB92", name: 0 },
-    { color: "#FAD0C4", name: 1 },
-    { color: "#96FBC4", name: 2 },
-    { color: "#C2E9FB", name: 3 },
-    { color: "#C3CFE2", name: 4 },
-    { color: "#E0C3FC", name: 5 },
+    { color: "rgba(252,222,159,0.30)", name: 0 },
+    { color: "rgba(250,208,196,0.30)", name: 1 },
+    { color: "rgba(150,251,196,0.30)", name: 2 },
+    { color: "rgba(194,233,251,0.30)", name: 3 },
+    { color: "rgba(195,207,226,0.30)", name: 4 },
+    { color: "rgba(224,195,252,0.30)", name: 5 },
   ];
 
   const storageColor = window.localStorage.getItem("webTranslateColor");
