@@ -108,6 +108,7 @@
     transform: scaleY(0);
     transition: all 0.2s ease-in-out;
     padding: 4px 0;
+    z-index: 1;
   }
   .select-item {
     height: 28px;

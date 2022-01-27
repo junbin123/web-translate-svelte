@@ -3,8 +3,6 @@ import ToolBar from "./components/ToolBar.svelte";
 import "./styles/common.scss";
 console.log("我是content.js2");
 
-document;
-
 const app = new ToolBar({
   target: document.body,
   props: {},

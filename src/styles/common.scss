@@ -1,4 +1,9 @@
 .web-translate-svelte {
+  text-align: left;
+  display: block;
+  font-family: sans-serif;
+  font-weight: normal;
+  box-sizing: border-box;
   img {
     display: block;
     margin: 0 !important;
@@ -19,7 +24,7 @@
   .justify-between {
     justify-content: space-between;
   }
-  
+
   .align-center {
     align-items: center;
   }

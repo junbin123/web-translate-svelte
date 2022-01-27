@@ -1,19 +1,44 @@
 <script>
   import LanguageSelect from "./LanguageSelect.svelte";
+  import { createEventDispatcher } from "svelte";
+  import iconDone from "../static/images/icon-done.png";
   import { onMount } from "svelte";
+  const dispatch = createEventDispatcher();
 
   onMount(() => {
     console.log("组件onMonut");
   });
 
   const colorList = [
-    { value: "#57A627", name: 0 },
-    { value: "#DB4455", name: 1 },
-    { value: "#DB4455", name: 2 },
-    { value: "#DB4455", name: 3 },
-    { value: "#DB4455", name: 4 },
-    { value: "#DB4455", name: 5 },
+    { color: "#FDDB92", name: 0 },
+    { color: "#FAD0C4", name: 1 },
+    { color: "#96FBC4", name: 2 },
+    { color: "#C2E9FB", name: 3 },
+    { color: "#C3CFE2", name: 4 },
+    { color: "#E0C3FC", name: 5 },
   ];
+
+  const storageColor = window.localStorage.getItem("webTranslateColor");
+  let selectColor = storageColor || colorList[0].color;
+
+  function changeColor(e) {
+    const color = e.target.dataset.color;
+    if (color) {
+      selectColor = color;
+      window.localStorage.webTranslateColor = color;
+      dispatch("changeColor", color);
+    }
+  }
+
+  function handleClick(e) {
+    const type = e.target.dataset.type;
+    const params = {
+      transType: "en2zh",
+      color: selectColor,
+      type,
+    };
+    dispatch("handleTranslate", params);
+  }
 </script>
 
 <main>
@@ -26,18 +51,25 @@
     </div>
     <div class="cell-item flex align-center">
       <div class="cell-left flex justify-end">背景色</div>
-      <div class="cell-right flex align-center">
-        {#each colorList as { value }}
-          <div>
-            <div class="color-item" style={"background:" + value} />
+      <div class="cell-right flex align-center" on:click={changeColor}>
+        {#each colorList as item}
+          <div class="color-box">
+            {#if item.color === selectColor}
+              <img src={iconDone} alt="icon" class="select-color" />
+            {/if}
+            <div
+              class="color-item"
+              style={"background:" + item.color}
+              data-color={item.color}
+            />
           </div>
         {/each}
       </div>
     </div>
 
-    <div class="button-box flex-between">
-      <div class="button-left flex-center">不翻译了</div>
-      <div class="button-right flex-center">重新翻译</div>
+    <div class="button-box flex-between" on:click={handleClick}>
+      <div class="button-left flex-center" data-type="不翻译了">不翻译了</div>
+      <div class="button-right flex-center" data-type="重新翻译">重新翻译</div>
     </div>
   </div>
 </main>
@@ -72,7 +104,13 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
+  }
+  .color-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
     margin-right: 10px;
+    position: relative;
   }
   .button-box {
     width: 300px;
@@ -104,5 +142,12 @@
   }
   .button-right:hover {
     background: #fa643e;
+  }
+  .select-color {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 </style>

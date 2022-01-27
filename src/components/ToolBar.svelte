@@ -11,6 +11,21 @@
   function handleClick() {
     showPop = !showPop;
   }
+  function handleTranslate(data) {
+    const { type, color, transType } = data.detail;
+    if (type === "重新翻译") {
+      console.log(1);
+      return;
+    }
+    if (type === "不翻译了") {
+      console.log(2);
+    }
+    console.log(color, transType, "0--------------------");
+  }
+
+  function changeColor(data) {
+    console.log(data.detail, "changeColor");
+  }
 </script>
 
 <main>
@@ -26,7 +41,10 @@
       id="pop-box"
       class={`transition-300 ${showPop ? "show-pop" : "hide-pop"}`}
     >
-      <SettingPop />
+      <SettingPop
+        on:handleTranslate={handleTranslate}
+        on:changeColor={changeColor}
+      />
     </div>
   </div>
 </main>
