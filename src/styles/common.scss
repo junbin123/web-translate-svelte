@@ -1,0 +1,104 @@
+.web-translate-svelte {
+  img {
+    display: block;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .flex {
+    display: flex;
+  }
+  .justify-end {
+    justify-content: flex-end;
+  }
+  .justify-start {
+    justify-content: flex-start;
+  }
+  .justify-center {
+    justify-content: center;
+  }
+  .justify-between {
+    justify-content: space-between;
+  }
+  
+  .align-center {
+    align-items: center;
+  }
+  .align-start {
+    align-items: flex-start;
+  }
+  .align-end {
+    align-items: flex-end;
+  }
+
+  .flex-column {
+    display: flex;
+    flex-direction: column;
+  }
+  .flex-row {
+    display: flex;
+    flex-direction: row;
+  }
+  .flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .color-main {
+    color: #243949;
+  }
+  .color-secondary {
+    color: #517fa4;
+  }
+  .color-orange {
+    color: #ff6239;
+  }
+  .color-grey {
+    color: #9bb1c8;
+  }
+  .color-light-grey {
+    color: #e9ecf0;
+  }
+  .transition-300 {
+    transition: all 0.3s ease-in-out;
+  }
+}
+
+/* 页面翻译动画样式 */
+.content-class {
+  display: inline-block;
+  color: rgba(0, 0, 0, 0);
+  background-image: linear-gradient(
+    -225deg,
+    #231557 0%,
+    #44107a 29%,
+    #ff1361 67%,
+    #fff800 100%
+  );
+  text-shadow: none;
+  border-radius: 4px;
+  animation: animateGlow 2s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+.content-class-complete {
+  display: inline-block;
+}
+.content-class-complete:hover {
+  box-shadow: 0 0 0 1px #f09819;
+}
+@keyframes animateGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

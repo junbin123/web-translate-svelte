@@ -1,6 +1,6 @@
 import { fullTrans } from "./utils/full_translate.js";
 import ToolBar from "./components/ToolBar.svelte";
-import "./styles/common.css";
+import "./styles/common.scss";
 console.log("我是content.js2");
 
 document;

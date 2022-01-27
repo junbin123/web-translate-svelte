@@ -14,7 +14,7 @@
 </script>
 
 <main>
-  <div class="container">
+  <div class="container web-translate-svelte">
     <div class="click-box" on:click={handleClick}>
       {#if showPop}
         <img src={clickClose} alt="close" class="click-item" />

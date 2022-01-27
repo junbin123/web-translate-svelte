@@ -3,6 +3,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import css from "rollup-plugin-css-only";
+import scss from "rollup-plugin-scss";
 import preprocess from "svelte-preprocess";
 import image from "@rollup/plugin-image";
 const production = !process.env.ROLLUP_WATCH;
@@ -31,7 +32,12 @@ export default [
       name: "content",
       dir: "public/content",
     },
-    plugins: [css({ output: "content.css" }), ...pluginsConfig, image()],
+    plugins: [
+      // css({ output: "content.css" }),
+      ...pluginsConfig,
+      image(),
+      scss({ output: "public/content/content.css" }),
+    ],
   },
   {
     input: "src/background.js",
