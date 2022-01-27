@@ -261,10 +261,10 @@ function clearText(text) {
   return result;
 }
 
-function removeAllDom() {
+export const removeAllDom = () => {
   targetNodeList.forEach((item) => {
     removeDom(item);
   });
   transIndex = 0;
   targetNodeList.length = 0;
-}
+};

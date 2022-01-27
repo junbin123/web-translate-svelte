@@ -2,14 +2,19 @@
   import clickClose from "../static/images/click-close.png";
   import clickLogo from "../static/images/click-logo.png";
   import SettingPop from "./SettingPop.svelte";
+  import { fullTrans, removeAllDom } from "../utils/full_translate.js";
   import { onMount } from "svelte";
   let showPop = false;
 
+  onMount(() => {
+    console.log("组件onMonut");
+  });
+  // 点击其他区域隐藏弹窗
   document.body.addEventListener(
     "click",
     function ({ target }) {
       if (
-        target.closest("#web-translate-svelte") &&
+        !target.closest("#web-translate-svelte") &&
         !target.className.split(" ").find((item) => item === "click-item")
       ) {
         showPop = false;
@@ -18,23 +23,32 @@
     { passive: true }
   );
 
-  //使用
 
-  onMount(() => {
-    console.log("组件onMonut");
-  });
+  chrome.runtime.onMessage.addListener(
+    async (request, sender, sendResponse) => {
+      const urlKey = encodeURIComponent(document.location.href);
+      const hasTrans = window.sessionStorage.getItem(urlKey);
+      console.log({ hasTrans, request });
+      if (hasTrans) {
+        return;
+      }
+      window.sessionStorage.setItem(urlKey, 1);
+      fullTrans({ ...request });
+      // sendResponse({ canTrans: true, currentUrl, msg: "开始翻译" });
+    }
+  );
 
-  function handleClick() {
-    showPop = !showPop;
-  }
   function handleTranslate(data) {
     const { type, color, transType } = data.detail;
     if (type === "重新翻译") {
-      console.log(1);
+      showPop = false;
       return;
     }
     if (type === "不翻译了") {
-      console.log(2);
+      const urlKey = encodeURIComponent(document.location.href);
+      showPop = false;
+      window.sessionStorage.removeItem(urlKey);
+      removeAllDom();
     }
     console.log(color, transType, "0--------------------");
   }
@@ -46,7 +60,7 @@
 
 <main>
   <div class="container" id="web-translate-svelte">
-    <div class="click-box" on:click={handleClick}>
+    <div class="click-box" on:click={() => (showPop = !showPop)}>
       {#if showPop}
         <img src={clickClose} alt="close" class="click-item" />
       {:else}
