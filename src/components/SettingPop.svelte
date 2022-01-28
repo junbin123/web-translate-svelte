@@ -1,6 +1,5 @@
 <script>
   import LanguageSelect from "./LanguageSelect.svelte";
-  import iconRight from "../static/images/icon-right.png";
   import { createEventDispatcher } from "svelte";
   import iconDone from "../static/images/icon-done.png";
   import { onMount } from "svelte";
@@ -205,9 +204,9 @@
     text-decoration: none;
   }
 
-  .link-img {
+  /* .link-img {
     width: 16px;
     height: 16px;
     display: inline-block;
-  }
+  } */
 </style>
