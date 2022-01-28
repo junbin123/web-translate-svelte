@@ -1,5 +1,6 @@
 <script>
   import LanguageSelect from "./LanguageSelect.svelte";
+  import iconRight from "../static/images/icon-right.png";
   import { createEventDispatcher } from "svelte";
   import iconDone from "../static/images/icon-done.png";
   import { onMount } from "svelte";
@@ -49,6 +50,16 @@
 
 <main>
   <div class="container">
+    <div class="connect-dev flex justify-end">
+      <a
+        class="click-connect flex-center"
+        href="https://junbin123.gitee.io/"
+        target="_blank"
+      >
+        联系开发者
+        <img src={iconRight} alt="icon" class="link-img" />
+      </a>
+    </div>
     <div class="cell-item flex align-center">
       <div class="cell-left flex justify-end">语言</div>
       <div class="cell-right">
@@ -87,7 +98,7 @@
     border: 1px solid #ddd;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    padding-top: 20px;
+    /* padding-top: 20px; */
     -moz-user-select: none; /* 火狐 */
     -webkit-user-select: none; /* 谷歌 */
     -ms-user-select: none; /* IE */
@@ -155,5 +166,26 @@
     position: absolute;
     top: 0;
     left: 0;
+  }
+  .connect-dev {
+    padding: 10px 0;
+    padding-right: 20px;
+  }
+  .click-connect {
+    font-size: 12px;
+    width: 80px;
+    color: #a0adbf;
+    border-radius: 4px;
+    height: 20px;
+    padding-left: 6px;
+  }
+  .click-connect:hover {
+    background: #3c4c5f;
+    text-decoration: none;
+  }
+  .link-img {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
   }
 </style>
