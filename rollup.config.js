@@ -62,7 +62,7 @@ export default [
       ...pluginsConfig,
       image(),
       scss({ output: "public/content/content.css" }),
-      proxy(),
+      // proxy(),
     ],
   },
   {

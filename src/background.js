@@ -1,4 +1,5 @@
-console.log("我是background.js");
+import { baiduApi } from "./request/translate/baidu";
+console.log("我是background.js22");
 // 监听活动tab
 // chrome.tabs.onActivated.addListener((tab) => {
 //   console.log("监听活动的tab:", tab);
@@ -14,7 +15,6 @@ console.log("我是background.js");
 //   });
 // });
 
-
 // 监听扩展icon的点击
 chrome.browserAction.onClicked.addListener(function (tab) {
   console.log("点击扩展按钮", tab);
@@ -26,3 +26,15 @@ chrome.browserAction.onClicked.addListener(function (tab) {
     });
   });
 });
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  doSomethingWith(request).then(sendResponse);
+  return true;
+});
+
+async function doSomethingWith(request) {
+  const source = ["This Bloomberg report provided a good summary."];
+  const transType = "auto2zh";
+  const res = await baiduApi({ source, transType });
+  return res;
+}

@@ -31,17 +31,18 @@ export const baiduApi = async ({ source = [], transType = "auto2zh" }) => {
     data
   )}`;
   // const { from = "", to = "", trans_result = [] } = await request.get(url);
-
-  const a = `http://localhost:8080/${url}`
-  const res = await fetch(a).then((data) => {
+  const {
+    from = "",
+    to = "",
+    trans_result = [],
+  } = await fetch(url).then((data) => {
     return data.json();
   });
-  console.log("baidu-----------------", res);
   return {
-    // source,
-    // target: trans_result.map((item) => item.dst),
-    // sourceLang: from,
-    // tragetLang: to,
+    source,
+    target: trans_result.map((item) => item.dst),
+    sourceLang: from,
+    tragetLang: to,
   };
 };
 

@@ -4,6 +4,7 @@
   "version": "0.0.3",
   "description": "一款简单高效的网页翻译插件",
   "permissions": [
+    "https://*/",
     "tabs",
     "storage",
     "declarativeContent",
