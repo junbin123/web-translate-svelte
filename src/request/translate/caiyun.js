@@ -1,5 +1,5 @@
 import request from '../request.js'
-const token = 'oo00trx4oclspt3nqhfc' // TODO:通过链接获取
+const token = '输入彩云翻译token' // TODO:通过链接获取
 /**
  *  彩云翻译API
  * @param {Array} source 待翻译文本列表

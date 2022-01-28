@@ -158,7 +158,7 @@ async function requestCaiYun({ source = [], transType = "en2zh" }) {
   const params = {
     headers: {
       "content-type": "application/json",
-      "x-authorization": "token oo00trx4oclspt3nqhfc",
+      "x-authorization": "token 输入彩云翻译token",
     },
     body: JSON.stringify(data),
     method: "POST",
