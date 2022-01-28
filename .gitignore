@@ -2,3 +2,5 @@
 .DS_Store
 /public/background
 /public/content
+public.pem
+public.crx
