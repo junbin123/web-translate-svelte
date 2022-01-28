@@ -36,6 +36,12 @@
       if (length > 0) {
         return;
       }
+
+      const display = document.getElementById("web-translate-svelte").style
+        .display;
+      if (display === "none") {
+        document.getElementById("web-translate-svelte").style.display = "block";
+      }
       fullTrans({ transType });
       // sendResponse({ canTrans: true, currentUrl, msg: "开始翻译" });
     }
@@ -65,7 +71,7 @@
 </script>
 
 <main>
-  <div class="container" id="web-translate-svelte">
+  <div class="container" id="web-translate-svelte" style="display:none">
     <div class="click-box" on:click={() => (showPop = !showPop)}>
       {#if showPop}
         <img src={clickClose} alt="close" class="click-item" />
