@@ -1,4 +1,3 @@
-// import request from '../request.js'
 import MD5 from "../../utils/md5";
 import { paramsStringify } from "../../utils/common";
 
@@ -30,7 +29,6 @@ export const baiduApi = async ({ source = [], transType = "auto2zh" }) => {
   const url = `https://fanyi-api.baidu.com/api/trans/vip/translate?${paramsStringify(
     data
   )}`;
-  // const { from = "", to = "", trans_result = [] } = await request.get(url);
   const {
     from = "",
     to = "",

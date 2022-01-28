@@ -28,13 +28,13 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  doSomethingWith(request).then(sendResponse);
+  const { source = [], transType = "auto2zh" } = request;
+  baiduApi({ source, transType })
+    .then((res) => {
+      sendResponse(res);
+    })
+    .catch((err) => {
+      sendResponse({ ...err, code: -1 });
+    });
   return true;
 });
-
-async function doSomethingWith(request) {
-  const source = ["This Bloomberg report provided a good summary."];
-  const transType = "auto2zh";
-  const res = await baiduApi({ source, transType });
-  return res;
-}

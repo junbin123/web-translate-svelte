@@ -44,7 +44,7 @@
         target.display = "block";
       }
       fullTrans({ transType: currTransType });
-      sendResponse({ canTrans: true, currentUrl, msg: "开始翻译" });
+      // sendResponse({ canTrans: true, msg: "开始翻译" });
     }
   );
 
