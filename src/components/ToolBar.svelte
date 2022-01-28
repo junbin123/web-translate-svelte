@@ -2,7 +2,12 @@
   import clickClose from "../static/images/click-close.png";
   import clickLogo from "../static/images/click-logo.png";
   import SettingPop from "./SettingPop.svelte";
-  import { fullTrans, removeAllDom } from "../utils/full_translate.js";
+  import {
+    fullTrans,
+    removeAllDom,
+    changeNodeColor,
+    getNodeLength,
+  } from "../utils/full_translate.js";
   import { onMount } from "svelte";
   let showPop = false;
 
@@ -23,17 +28,14 @@
     { passive: true }
   );
 
-
   chrome.runtime.onMessage.addListener(
     async (request, sender, sendResponse) => {
-      const urlKey = encodeURIComponent(document.location.href);
-      const hasTrans = window.sessionStorage.getItem(urlKey);
-      console.log({ hasTrans, request });
-      if (hasTrans) {
+      const length = getNodeLength();
+      const { transType } = request;
+      if (length > 0) {
         return;
       }
-      window.sessionStorage.setItem(urlKey, 1);
-      fullTrans({ ...request });
+      fullTrans({ transType });
       // sendResponse({ canTrans: true, currentUrl, msg: "开始翻译" });
     }
   );
@@ -41,13 +43,15 @@
   function handleTranslate(data) {
     const { type, color, transType } = data.detail;
     if (type === "重新翻译") {
+      if (getNodeLength() > 0) {
+        return;
+      }
+      fullTrans({ transType: "en2zh" });
       showPop = false;
       return;
     }
     if (type === "不翻译了") {
-      const urlKey = encodeURIComponent(document.location.href);
       showPop = false;
-      window.sessionStorage.removeItem(urlKey);
       removeAllDom();
     }
     console.log(color, transType, "0--------------------");
@@ -55,6 +59,7 @@
 
   function changeColor(data) {
     console.log(data.detail, "changeColor");
+    changeNodeColor({ color: data.detail });
   }
 </script>
 

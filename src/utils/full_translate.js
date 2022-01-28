@@ -4,8 +4,14 @@ let textList = []; // 要翻译的所有文本列表
 let transIndex = 0; // 翻译到哪个index
 let targetNodeList = []; // 新增的元素
 let transType = "en2zh"; // 翻译方式
+let bgColor = "";
 const transLength = 3000; // 每次翻译的文本长度
 let isLoading = false;
+
+export const getNodeLength = () => {
+  return targetNodeList.length;
+};
+
 /**
  * 全文翻译方法
  * @param {String} params.transType
@@ -239,7 +245,7 @@ async function doTransProcess({ originDomList = [] }) {
     transDomList.forEach((item, index) => {
       item.innerText = target[index];
       item.setAttribute("class", "content-class-complete");
-      item.style.backgroundColor = "rgba(252,222,159,0.40)";
+      item.style.backgroundColor = bgColor;
     });
   } catch (err) {
     console.log(err);
@@ -267,4 +273,12 @@ export const removeAllDom = () => {
   });
   transIndex = 0;
   targetNodeList.length = 0;
+};
+
+export const changeNodeColor = ({ color }) => {
+  console.log("changeNodeColor");
+  bgColor = color;
+  targetNodeList.forEach((ele) => {
+    ele.style.backgroundColor = color;
+  });
 };

@@ -4,22 +4,22 @@
   import iconDone from "../static/images/icon-done.png";
   import { onMount } from "svelte";
   const dispatch = createEventDispatcher();
-
-  onMount(() => {
-    console.log("组件onMonut");
-  });
-
   const colorList = [
-    { color: "rgba(252,222,159,0.30)", name: 0 },
-    { color: "rgba(250,208,196,0.30)", name: 1 },
+    { color: "rgba(252,222,159,0.40)", name: 0 },
+    { color: "rgba(250,208,196,0.40)", name: 1 },
     { color: "rgba(150,251,196,0.30)", name: 2 },
-    { color: "rgba(194,233,251,0.30)", name: 3 },
+    { color: "rgba(194,233,251,0.40)", name: 3 },
     { color: "rgba(195,207,226,0.30)", name: 4 },
     { color: "rgba(224,195,252,0.30)", name: 5 },
   ];
 
   const storageColor = window.localStorage.getItem("webTranslateColor");
   let selectColor = storageColor || colorList[0].color;
+
+  onMount(() => {
+    console.log("组件onMonut");
+    dispatch("changeColor", storageColor);
+  });
 
   function changeColor(e) {
     const color = e.target.dataset.color;
