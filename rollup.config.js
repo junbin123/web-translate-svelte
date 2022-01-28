@@ -8,31 +8,7 @@ import preprocess from "svelte-preprocess";
 import image from "@rollup/plugin-image";
 const production = !process.env.ROLLUP_WATCH;
 
-function proxy() {
-  let started = false;
-  return {
-    writeBundle() {
-      if (!started) {
-        started = true;
-        // Listen on a specific host via the HOST environment variable
-        var host = "localhost";
-        // Listen on a specific port via the PORT environment variable
-        var portTemp = 8080;
 
-        var cors_proxy = require("cors-anywhere");
-        cors_proxy
-          .createServer({
-            originWhitelist: [], // Allow all origins
-            requireHeader: ["origin", "x-requested-with"],
-            removeHeaders: ["cookie", "cookie2"],
-          })
-          .listen(portTemp, host, function () {
-            console.log("Running CORS Anywhere on " + host + ":" + portTemp);
-          });
-      }
-    },
-  };
-}
 
 const pluginsConfig = [
   production && terser(),

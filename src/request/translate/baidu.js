@@ -29,19 +29,30 @@ export const baiduApi = async ({ source = [], transType = "auto2zh" }) => {
   const url = `https://fanyi-api.baidu.com/api/trans/vip/translate?${paramsStringify(
     data
   )}`;
-  const {
-    from = "",
-    to = "",
-    trans_result = [],
-  } = await fetch(url).then((data) => {
-    return data.json();
-  });
-  return {
-    source,
-    target: trans_result.map((item) => item.dst),
-    sourceLang: from,
-    tragetLang: to,
-  };
+  // const {
+  //   from = "",
+  //   to = "",
+  //   trans_result = [],
+  // } = await fetch(url).then((data) => {
+  //   return data.json();
+  // });
+  try {
+    const res = await fetch(url).then((data) => {
+      return data.json();
+    });
+    const { from = "", to = "", trans_result } = res;
+    if (!trans_result) {
+      return res;
+    }
+    return {
+      source,
+      target: trans_result.map((item) => item.dst),
+      sourceLang: from,
+      tragetLang: to,
+    };
+  } catch (err) {
+    return err;
+  }
 };
 
 // 如何调用?

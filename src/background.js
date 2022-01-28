@@ -29,9 +29,11 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const { source = [], transType = "auto2zh" } = request;
+  console.log("来自页面的数据2", { ...request });
   baiduApi({ source, transType })
     .then((res) => {
-      sendResponse(res);
+      console.log("翻译结果：", res);
+      sendResponse(res.source ? res : { code: -1, ...res });
     })
     .catch((err) => {
       sendResponse({ ...err, code: -1 });

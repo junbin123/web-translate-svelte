@@ -2,6 +2,7 @@
   import clickClose from "./static/images/click-close.png";
   import clickLogo from "./static/images/click-logo.png";
   import SettingPop from "./components/SettingPop.svelte";
+  import { SvelteToast } from "@zerodevx/svelte-toast";
   import {
     fullTrans,
     removeAllDom,
@@ -19,11 +20,12 @@
   // 点击其他区域隐藏弹窗
   document.body.addEventListener(
     "click",
-    function ({ target }) {
-      if (
-        !target.closest("#web-translate-svelte") &&
-        !target?.className?.split(" ")?.find((item) => item === "click-item")
-      ) {
+    function ({ target = {} }) {
+      const has =
+        target.className &&
+        target.className.split(" ") &&
+        target.className.split(" ").find((item) => item === "click-item");
+      if (!target.closest("#web-translate-svelte") && !has) {
         showPop = false;
       }
     },
@@ -115,6 +117,7 @@
         on:changeColor={changeColor}
       />
     </div>
+    <SvelteToast />
   </div>
 </main>
 

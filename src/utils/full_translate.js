@@ -1,4 +1,5 @@
 import { flattenNodes } from "./common.js";
+import { toast } from "@zerodevx/svelte-toast";
 let nodeList = []; // 要翻译的所有元素
 let textList = []; // 要翻译的所有文本列表
 let transIndex = 0; // 翻译到哪个index
@@ -290,6 +291,13 @@ function transFunc(data = {}) {
     chrome.runtime.sendMessage({ source, transType }, (response) => {
       console.log("接收消息", { ...response });
       if (response.code === -1) {
+        // alert(response.error_msg);
+        toast.push("response.error_msg", {
+          theme: {
+            "--toastBackground": "#F56565",
+            "--toastBarBackground": "#C53030",
+          },
+        });
         reject(response);
       } else {
         resolve(response);
