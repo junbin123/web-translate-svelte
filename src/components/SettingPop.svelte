@@ -51,16 +51,6 @@
 
 <main>
   <div class="container">
-    <div class="connect-dev flex justify-end">
-      <a
-        class="click-connect flex-center"
-        href="https://junbin123.gitee.io/"
-        target="_blank"
-      >
-        联系开发者
-        <img src={iconRight} alt="icon" class="link-img" />
-      </a>
-    </div>
     <div class="cell-item flex align-center">
       <div class="cell-left flex justify-end">语言</div>
       <div class="cell-right">
@@ -85,9 +75,33 @@
       </div>
     </div>
 
-    <div class="button-box flex-between" on:click={handleClick}>
-      <div class="button-left flex-center" data-type="不翻译了">不翻译了</div>
-      <div class="button-right flex-center" data-type="重新翻译">重新翻译</div>
+    <div class="footer-box">
+      <div class="button-box flex-between" on:click={handleClick}>
+        <div class="button-left flex-center" data-type="不翻译了">不翻译了</div>
+        <div class="button-right flex-center" data-type="重新翻译">
+          重新翻译
+        </div>
+      </div>
+
+      <div class="connect-dev flex-center">
+        <a
+          class="click-connect flex-center"
+          href="https://junbin123.gitee.io/"
+          target="_blank"
+        >
+          联系开发者
+          <!-- <img src={iconRight} alt="icon" class="link-img" /> -->
+        </a>
+        ·
+        <a
+          class="click-connect flex-center"
+          href="https://support.qq.com/product/378623"
+          target="_blank"
+        >
+          用户反馈
+          <!-- <img src={iconRight} alt="icon" class="link-img" /> -->
+        </a>
+      </div>
     </div>
   </div>
 </main>
@@ -99,7 +113,7 @@
     border: 1px solid #ddd;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    /* padding-top: 20px; */
+    padding-top: 20px;
     -moz-user-select: none; /* 火狐 */
     -webkit-user-select: none; /* 谷歌 */
     -ms-user-select: none; /* IE */
@@ -130,14 +144,17 @@
     margin-right: 10px;
     position: relative;
   }
-  .button-box {
-    width: 300px;
-    height: 66px;
-    padding: 0 20px;
-    box-sizing: border-box;
+  .footer-box {
     background: rgba(20, 28, 34, 0.4);
     box-shadow: 0 -1px 0 0 #38414d;
     margin-top: 20px;
+  }
+
+  .button-box {
+    width: 300px;
+    padding: 0 20px;
+    padding-top: 12px;
+    box-sizing: border-box;
     font-size: 14px;
     font-weight: bold;
     color: #d8d8d8;
@@ -169,16 +186,17 @@
     left: 0;
   }
   .connect-dev {
-    padding: 10px 0;
-    padding-right: 20px;
+    padding-bottom: 10px;
+    padding-top: 6px;
+    font-size: 12px;
+    color: #a0adbf;
   }
   .click-connect {
-    font-size: 12px;
-    width: 82px;
+    /* width: 60px; */
     color: #a0adbf;
     border-radius: 4px;
     height: 20px;
-    padding-left: 6px;
+    padding: 0 8px;
     background: inherit;
     text-decoration: none;
   }
