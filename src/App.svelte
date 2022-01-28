@@ -1,13 +1,13 @@
 <script>
-  import clickClose from "../static/images/click-close.png";
-  import clickLogo from "../static/images/click-logo.png";
-  import SettingPop from "./SettingPop.svelte";
+  import clickClose from "./static/images/click-close.png";
+  import clickLogo from "./static/images/click-logo.png";
+  import SettingPop from "./components/SettingPop.svelte";
   import {
     fullTrans,
     removeAllDom,
     changeNodeColor,
     getNodeLength,
-  } from "../utils/full_translate.js";
+  } from "./utils/full_translate.js";
   import { onMount } from "svelte";
   let showPop = false;
 
@@ -31,7 +31,8 @@
   chrome.runtime.onMessage.addListener(
     async (request, sender, sendResponse) => {
       const length = getNodeLength();
-      const { transType } = request;
+      const transType =
+        window.localStorage.getItem("webTranslateTransType") || "en2zh";
       if (length > 0) {
         return;
       }
@@ -44,9 +45,10 @@
     const { type, color, transType } = data.detail;
     if (type === "重新翻译") {
       if (getNodeLength() > 0) {
+        showPop = false;
         return;
       }
-      fullTrans({ transType: "en2zh" });
+      fullTrans({ transType });
       showPop = false;
       return;
     }
@@ -54,7 +56,6 @@
       showPop = false;
       removeAllDom();
     }
-    console.log(color, transType, "0--------------------");
   }
 
   function changeColor(data) {

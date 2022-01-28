@@ -1,8 +1,7 @@
-import ToolBar from "./components/ToolBar.svelte";
+import App from "./App.svelte";
 import "./styles/common.scss";
-console.log("我是content.js2");
 
-const app = new ToolBar({
+const app = new App({
   target: document.body,
   props: {},
 });

@@ -15,10 +15,12 @@
 
   const storageColor = window.localStorage.getItem("webTranslateColor");
   let selectColor = storageColor || colorList[0].color;
+  let transType =
+    window.localStorage.getItem("webTranslateTransType") || "en2zh";
 
   onMount(() => {
     console.log("组件onMonut");
-    dispatch("changeColor", storageColor);
+    dispatch("changeColor", selectColor);
   });
 
   function changeColor(e) {
@@ -33,11 +35,15 @@
   function handleClick(e) {
     const type = e.target.dataset.type;
     const params = {
-      transType: "en2zh",
+      transType: transType,
       color: selectColor,
       type,
     };
     dispatch("handleTranslate", params);
+  }
+
+  function changeLang(data) {
+    transType = data.detail.join("2");
   }
 </script>
 
@@ -46,7 +52,7 @@
     <div class="cell-item flex align-center">
       <div class="cell-left flex justify-end">语言</div>
       <div class="cell-right">
-        <LanguageSelect />
+        <LanguageSelect on:handleChange={changeLang} />
       </div>
     </div>
     <div class="cell-item flex align-center">

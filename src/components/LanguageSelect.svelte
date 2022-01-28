@@ -42,12 +42,6 @@
     dispatch("handleChange", value);
   }
 
-  // function handleSwitch() {
-  //   const temp = value[0];
-  //   value[0] = value[1];
-  //   value[1] = temp;
-  //   dispatch("handleChange", value);
-  // }
   function handleClick() {
     leftShowList = false;
     rightShowList = false;
