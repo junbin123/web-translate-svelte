@@ -14,7 +14,7 @@
     },
     {
       name: "日语",
-      value: "ja",
+      value: "jp",
     },
   ];
   export let value = ["en", "zh"];

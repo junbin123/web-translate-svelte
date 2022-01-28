@@ -164,9 +164,10 @@ async function requestCaiYun({ source = [], transType = "en2zh" }) {
     method: "POST",
   };
   try {
-    const res = await fetch(url, params).then((data) => {
-      return data.json();
-    });
+    // const res = await fetch(url, params).then((data) => {
+    //   return data.json();
+    // });
+    const res = await transFunc({ source, transType });
     console.log("彩云结果", res);
     return res;
   } catch (err) {
@@ -282,3 +283,18 @@ export const changeNodeColor = ({ color }) => {
     ele.style.backgroundColor = color;
   });
 };
+
+function transFunc(data = {}) {
+  const promise = new Promise((resolve, reject) => {
+    const { source = ["hello world"], transType = "auto2zh" } = data;
+    chrome.runtime.sendMessage({ source, transType }, (response) => {
+      console.log("接收消息", { ...response });
+      if (response.code === -1) {
+        reject(response);
+      } else {
+        resolve(response);
+      }
+    });
+  });
+  return promise;
+}
