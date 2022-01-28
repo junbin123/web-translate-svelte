@@ -10,6 +10,8 @@
   } from "./utils/full_translate.js";
   import { onMount } from "svelte";
   let showPop = false;
+  let currTransType =
+    window.localStorage.getItem("webTranslateTransType") || "en2zh";
 
   onMount(() => {
     console.log("组件onMonut");
@@ -31,8 +33,6 @@
   chrome.runtime.onMessage.addListener(
     async (request, sender, sendResponse) => {
       const length = getNodeLength();
-      const transType =
-        window.localStorage.getItem("webTranslateTransType") || "en2zh";
       if (length > 0) {
         return;
       }
@@ -42,7 +42,7 @@
       if (display === "none") {
         document.getElementById("web-translate-svelte").style.display = "block";
       }
-      fullTrans({ transType });
+      fullTrans({ transType: currTransType });
       // sendResponse({ canTrans: true, currentUrl, msg: "开始翻译" });
     }
   );
@@ -50,6 +50,14 @@
   function handleTranslate(data) {
     const { type, color, transType } = data.detail;
     if (type === "重新翻译") {
+      if (transType !== currTransType) {
+        currTransType = transType;
+        window.localStorage.setItem("webTranslateTransType", transType);
+        removeAllDom();
+        fullTrans({ transType });
+        showPop = false;
+        return;
+      }
       if (getNodeLength() > 0) {
         showPop = false;
         return;

@@ -81,7 +81,7 @@
     cursor: pointer;
   }
   #select-box {
-    width: 80px;
+    width: 90px;
     height: 30px;
     line-height: 30px;
     padding-left: 8px;

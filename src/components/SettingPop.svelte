@@ -18,6 +18,7 @@
   let selectColor = storageColor || colorList[0].color;
   let transType =
     window.localStorage.getItem("webTranslateTransType") || "en2zh";
+  let langValue = transType.split("2");
 
   onMount(() => {
     console.log("组件onMonut");
@@ -63,7 +64,7 @@
     <div class="cell-item flex align-center">
       <div class="cell-left flex justify-end">语言</div>
       <div class="cell-right">
-        <LanguageSelect on:handleChange={changeLang} />
+        <LanguageSelect on:handleChange={changeLang} value={langValue} />
       </div>
     </div>
     <div class="cell-item flex align-center">
@@ -173,16 +174,19 @@
   }
   .click-connect {
     font-size: 12px;
-    width: 80px;
+    width: 82px;
     color: #a0adbf;
     border-radius: 4px;
     height: 20px;
     padding-left: 6px;
+    background: inherit;
+    text-decoration: none;
   }
   .click-connect:hover {
     background: #3c4c5f;
     text-decoration: none;
   }
+
   .link-img {
     width: 16px;
     height: 16px;

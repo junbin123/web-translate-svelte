@@ -68,7 +68,7 @@
 
 <style scoped>
   .container {
-    width: 180px;
+    width: 200px;
     height: 30px;
   }
   .middle-icon {
