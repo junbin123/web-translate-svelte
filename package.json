@@ -21,6 +21,6 @@
     "svelte-preprocess": "^4.6.9"
   },
   "dependencies": {
-    "axios": "^0.21.1"
+    "cors-anywhere": "^0.4.4"
   }
 }

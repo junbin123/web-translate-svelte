@@ -16,5 +16,5 @@ baiduApi({ source, transType })
     console.log("j---", res);
   })
   .catch((err) => {
-    console.log("j---", err);
+    console.log("t---", err);
   });

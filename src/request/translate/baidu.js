@@ -31,7 +31,9 @@ export const baiduApi = async ({ source = [], transType = "auto2zh" }) => {
     data
   )}`;
   // const { from = "", to = "", trans_result = [] } = await request.get(url);
-  const res = await fetch(url).then((data) => {
+
+  const a = `http://localhost:8080/${url}`
+  const res = await fetch(a).then((data) => {
     return data.json();
   });
   console.log("baidu-----------------", res);
