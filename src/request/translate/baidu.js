@@ -1,5 +1,5 @@
 import request from '../request.js'
-import MD5 from '../../utils/basic/md5'
+import MD5 from '../../utils/md5'
 import { paramsStringify } from '../../utils/common'
 
 const secretKey = 'Z9MEIDLQYiecSXYJNb3_' // 应用密钥 TODO:通过链接获取
