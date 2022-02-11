@@ -120,6 +120,7 @@ export const getBrowserInfo = () => {
  * @returns {Array} result
  */
 export function flattenNodes(element) {
+  // alert(1)
   const result = []
   recursiveNodes(element)
   // 递归dom
@@ -152,7 +153,11 @@ export function flattenNodes(element) {
  * @param {string} url 页面url 一般为window.location.host
  * @return {boolean} true 要的 false 不要的
  */
-export function filterDom({ element, url = window.location.host }) {
+export function filterDom({ element }) {
+  console.log('dataset--------')
+  const dataset = element.dataset
+  console.log(dataset)
+
   const text = element.textContent.replace(/\s+/g, '')
   if (text.length < 4) {
     return false

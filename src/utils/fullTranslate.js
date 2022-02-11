@@ -24,7 +24,7 @@ export const fullTrans = async (params) => {
   textList = nodeList.map((item) => clearText(item.textContent))
   console.log('nodeList', nodeList[0])
   console.log('textList', textList)
-  const { targetList, endIndex } = getListByLength({
+  const { endIndex } = getListByLength({
     list: textList,
     length: transLength,
   })
@@ -71,18 +71,18 @@ function getListByLength({ list = [], length = 1000 }) {
  * 页面滚动事件
  * @param {elemet} e
  */
-async function windowScroll(e) {
+async function windowScroll() {
   if (transIndex === 0 || transIndex === nodeList.length - 1 || isLoading) {
     return
   }
   const dom = nodeList[transIndex + 1]
-  const { relativeWindow = '', isVisible = false } = judgeDomVisible(dom)
+  const { relativeWindow = '' } = judgeDomVisible(dom)
   if (['intersectBottom', 'outsideBottom'].includes(relativeWindow)) {
     return
   }
   isLoading = true
   const nextTextList = textList.slice(transIndex + 1)
-  const { targetList, endIndex } = getListByLength({
+  const { endIndex } = getListByLength({
     list: nextTextList,
     length: transLength,
   })
@@ -105,6 +105,7 @@ async function windowScroll(e) {
  */
 function addChildNode({ parentDom, childText }) {
   const childNode = document.createElement('font')
+  // childNode.dataset.webTranslate = 'translateTarget'
   childNode.innerText = childText
   childNode.setAttribute('class', 'content-class')
   parentDom.appendChild(childNode)
@@ -130,35 +131,16 @@ function throttle(fn, delay = 500) {
 }
 
 // 将子节点转化为element
-function toChildElement(parent) {
-  if (parent.hasChildNodes()) {
-    const childList = parent.childNodes
-    childList.forEach((item) => {
-      if (item.textContent.replace(/\s+/g, '') && item.nodeName === '#text') {
-        const newEle = document.createElement('div')
-        newEle.innerText = item.textContent.trim() + '新'
-        parent.replaceChild(newEle, item)
-      }
-    })
-  }
-}
-
-/**
- * 请求翻译接口
- * @param {array} source 翻译内容
- * @param {string} transType 目标语言
- */
-// async function requestCaiYun({ source = [], transType = 'en2zh' }) {
-//   try {
-//     // const res = await fetch(url, params).then((data) => {
-//     //   return data.json();
-//     // });
-//     const res = await transFunc({ source, transType })
-//     console.log('彩云结果', res)
-//     return res
-//   } catch (err) {
-//     console.log('彩云报错', err)
-//     return err
+// function toChildElement(parent) {
+//   if (parent.hasChildNodes()) {
+//     const childList = parent.childNodes
+//     childList.forEach((item) => {
+//       if (item.textContent.replace(/\s+/g, '') && item.nodeName === '#text') {
+//         const newEle = document.createElement('div')
+//         newEle.innerText = item.textContent.trim() + '新'
+//         parent.replaceChild(newEle, item)
+//       }
+//     })
 //   }
 // }
 
@@ -208,7 +190,7 @@ async function doTransProcess({ originDomList = [] }) {
   if (originDomList.length === 0) return []
   const originTextList = [] // 没翻译的文本列表
   const transDomList = [] // 翻译好的dom
-  originDomList.forEach((item, index) => {
+  originDomList.forEach((item) => {
     const text = clearText(item.textContent)
     const dom = addChildNode({ parentDom: item, childText: text })
     originTextList.push(text)

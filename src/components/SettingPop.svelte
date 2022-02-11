@@ -1,50 +1,49 @@
 <script>
-  import LanguageSelect from "./LanguageSelect.svelte";
-  import { createEventDispatcher } from "svelte";
-  import iconDone from "../static/images/icon-done.png";
-  import { onMount } from "svelte";
-  const dispatch = createEventDispatcher();
+  import LanguageSelect from './LanguageSelect.svelte'
+  import { createEventDispatcher } from 'svelte'
+  import iconDone from '../static/images/icon-done.png'
+  import { onMount } from 'svelte'
+  const dispatch = createEventDispatcher()
   const colorList = [
-    { color: "rgba(252,222,159,0.40)", name: 0 },
-    { color: "rgba(250,208,196,0.40)", name: 1 },
-    { color: "rgba(150,251,196,0.30)", name: 2 },
-    { color: "rgba(194,233,251,0.40)", name: 3 },
-    { color: "rgba(195,207,226,0.30)", name: 4 },
-    { color: "rgba(224,195,252,0.30)", name: 5 },
-  ];
+    { color: 'rgba(252,222,159,0.40)', name: 0 },
+    { color: 'rgba(250,208,196,0.40)', name: 1 },
+    { color: 'rgba(150,251,196,0.30)', name: 2 },
+    { color: 'rgba(194,233,251,0.40)', name: 3 },
+    { color: 'rgba(195,207,226,0.30)', name: 4 },
+    { color: 'rgba(224,195,252,0.30)', name: 5 },
+  ]
 
-  const storageColor = window.localStorage.getItem("webTranslateColor");
-  let selectColor = storageColor || colorList[0].color;
-  let transType =
-    window.localStorage.getItem("webTranslateTransType") || "en2zh";
-  let langValue = transType.split("2");
+  const storageColor = window.localStorage.getItem('webTranslateColor')
+  let selectColor = storageColor || colorList[0].color
+  let transType = window.localStorage.getItem('webTranslateTransType') || 'en2zh'
+  let langValue = transType.split('2')
 
   onMount(() => {
-    console.log("组件onMonut");
-    dispatch("changeColor", selectColor);
-  });
+    console.log('组件onMonut')
+    dispatch('changeColor', selectColor)
+  })
 
   function changeColor(e) {
-    const color = e.target.dataset.color;
+    const color = e.target.dataset.color
     if (color) {
-      selectColor = color;
-      window.localStorage.webTranslateColor = color;
-      dispatch("changeColor", color);
+      selectColor = color
+      window.localStorage.webTranslateColor = color
+      dispatch('changeColor', color)
     }
   }
 
   function handleClick(e) {
-    const type = e.target.dataset.type;
+    const type = e.target.dataset.type
     const params = {
       transType: transType,
       color: selectColor,
       type,
-    };
-    dispatch("handleTranslate", params);
+    }
+    dispatch('handleTranslate', params)
   }
 
   function changeLang(data) {
-    transType = data.detail.join("2");
+    transType = data.detail.join('2')
   }
 </script>
 
@@ -64,11 +63,7 @@
             {#if item.color === selectColor}
               <img src={iconDone} alt="icon" class="select-color" />
             {/if}
-            <div
-              class="color-item"
-              style={"background:" + item.color}
-              data-color={item.color}
-            />
+            <div class="color-item" style={'background:' + item.color} data-color={item.color} />
           </div>
         {/each}
       </div>
@@ -77,17 +72,11 @@
     <div class="footer-box">
       <div class="button-box flex-between" on:click={handleClick}>
         <div class="button-left flex-center" data-type="不翻译了">不翻译了</div>
-        <div class="button-right flex-center" data-type="重新翻译">
-          重新翻译
-        </div>
+        <div class="button-right flex-center" data-type="重新翻译">重新翻译</div>
       </div>
 
       <div class="connect-dev flex-center">
-        <a
-          class="click-connect flex-center"
-          href="https://junbin123.gitee.io/"
-          target="_blank"
-        >
+        <a class="click-connect flex-center" href="https://junbin123.gitee.io/" target="_blank">
           联系开发者
           <!-- <img src={iconRight} alt="icon" class="link-img" /> -->
         </a>

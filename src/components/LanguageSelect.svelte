@@ -1,50 +1,50 @@
 <script>
-  import FormSelect from "./FormSelect.svelte";
-  import iconRight from "../static/images/icon-right.png";
-  import { createEventDispatcher } from "svelte";
-  const dispatch = createEventDispatcher();
+  import FormSelect from './FormSelect.svelte'
+  import iconRight from '../static/images/icon-right.png'
+  import { createEventDispatcher } from 'svelte'
+  const dispatch = createEventDispatcher()
   export let langList = [
     {
-      name: "中文",
-      value: "zh",
+      name: '中文',
+      value: 'zh',
     },
     {
-      name: "英语",
-      value: "en",
+      name: '英语',
+      value: 'en',
     },
     {
-      name: "日语",
-      value: "jp",
+      name: '日语',
+      value: 'jp',
     },
-  ];
-  export let value = ["en", "zh"];
+  ]
+  export let value = ['en', 'zh']
 
-  let leftShowList = false;
-  let rightShowList = false;
+  let leftShowList = false
+  let rightShowList = false
   function handleLeftClick() {
-    rightShowList = false;
+    rightShowList = false
   }
   function handleRightClick() {
-    leftShowList = false;
+    leftShowList = false
   }
   function handleChangeLeft({ detail }) {
     if (value[1] === detail.value) {
-      value[1] = value[0];
+      value[1] = value[0]
     }
-    value[0] = detail.value;
-    dispatch("handleChange", value);
+    value[0] = detail.value
+    dispatch('handleChange', value)
   }
   function handleChangeRight({ detail }) {
     if (value[0] === detail.value) {
-      value[0] = value[1];
+      value[0] = value[1]
     }
-    value[1] = detail.value;
-    dispatch("handleChange", value);
+    value[1] = detail.value
+    dispatch('handleChange', value)
   }
 
   function handleClick() {
-    leftShowList = false;
-    rightShowList = false;
+    leftShowList = false
+    rightShowList = false
   }
 </script>
 

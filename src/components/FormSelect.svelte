@@ -1,44 +1,44 @@
 <script>
-  import { createEventDispatcher } from "svelte";  
-  import iconDown from "../static/images/icon-down.png";
-  const dispatch = createEventDispatcher();
-  export let value = "en";
+  import { createEventDispatcher } from 'svelte'
+  import iconDown from '../static/images/icon-down.png'
+  const dispatch = createEventDispatcher()
+  export let value = 'en'
   export let options = [
     // 语言列表
     {
-      name: "中文",
-      value: "zh",
+      name: '中文',
+      value: 'zh',
     },
     {
-      name: "英语",
-      value: "en",
+      name: '英语',
+      value: 'en',
     },
     {
-      name: "日语",
-      value: "ja",
+      name: '日语',
+      value: 'ja',
     },
-  ];
-  $: selectName = options.find((item) => item.value === value).name;
+  ]
+  $: selectName = options.find((item) => item.value === value).name
 
-  export let showList = false; // 是否显示下拉框
+  export let showList = false // 是否显示下拉框
 
   // 选择语言点击事件
   function handleSelect({ target }) {
-    showList = false;
-    const { index } = target.dataset;
-    const item = options[Number(index)];
-    value = item.value;
-    dispatch("handleChange", item);
+    showList = false
+    const { index } = target.dataset
+    const item = options[Number(index)]
+    value = item.value
+    dispatch('handleChange', item)
   }
   // 下拉框点击事件
   function handleClick() {
-    dispatch("handleClick");
-    showList = !showList;
+    dispatch('handleClick')
+    showList = !showList
   }
 
   function onMove() {
-    console.log("11");
-    showList = !showList;
+    console.log('11')
+    showList = !showList
   }
 </script>
 
@@ -51,23 +51,11 @@
     on:click|stopPropagation={handleClick}
   >
     <div>{selectName}</div>
-    <img
-      src={iconDown}
-      alt="icon"
-      class="icon-box transition-300"
-      class:arrow-up={showList}
-    />
+    <img src={iconDown} alt="icon" class="icon-box transition-300" class:arrow-up={showList} />
   </div>
-  <div
-    class="select-container transition-300"
-    class:select-spread={showList}
-  >
+  <div class="select-container transition-300" class:select-spread={showList}>
     {#each options as item, index}
-      <div
-        on:click={handleSelect}
-        data-index={index}
-        class="select-item"
-      >
+      <div on:click={handleSelect} data-index={index} class="select-item">
         {item.name}
       </div>
     {/each}
@@ -112,7 +100,7 @@
   .select-item {
     height: 28px;
     line-height: 28px;
-    padding-left: 8px
+    padding-left: 8px;
   }
   .select-item:hover {
     background: #4e617a;

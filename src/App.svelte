@@ -8,7 +8,7 @@
     removeAllDom,
     changeNodeColor,
     getNodeLength,
-  } from './utils/full_translate.js'
+  } from './utils/fullTranslate.js'
   import { onMount } from 'svelte'
   let showPop = false
   let currTransType = window.localStorage.getItem('webTranslateTransType') || 'en2zh'
