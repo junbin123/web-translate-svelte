@@ -1,0 +1,38 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  //   "off"或0-关闭规则
+  // "warn"或1-将该规则作为警告打开（不影响退出代码）
+  // "error"或2-将规则作为错误打开（退出代码将为1）
+  "rules": {
+    "no-trailing-spaces": 2,
+    "no-multi-spaces": 2,
+    "quotes": [1, "single"],
+    "no-unused-vars": 1, // 定义了变量，未使用。可能有全局变量，别人使用的
+    "semi": [2, "never"],
+    "global-require": 0, // 不能使用require
+    "comma-dangle": 0, // 结尾逗号
+    "no-console": 0, // 不能有console，警告
+    "no-param-reassign": 0, // 不允许函数参数重新赋值
+    "no-unused-expressions": 0, // 不允许  this.toast.finally && this.toast.finally();形式
+    "func-names": 0, // 不允许使用 const getList = function() {...}，是个警告
+    "no-prototype-builtins": 0, // 不能使用prototype操作
+    "no-restricted-syntax": 0, // 禁止使用for in
+    "prefer-const": 0, // 如果没改变的话，必须是const
+    "no-undef": 0, // 使用了未定义的变量
+    "arrow-parens": 0, // 箭头函数用小括号括起来
+    "object-shorthand": 0, //强制对象字面量缩写语法、
+    "guard-for-in": 0, // for in循环要用if语句过滤
+    "import/no-dynamic-require": 0 // 不能使用动态require
+  },
+  "globals": {
+    "chrome": true
+  }
+}

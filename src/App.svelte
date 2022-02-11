@@ -1,106 +1,100 @@
 <script>
-  import clickClose from "./static/images/click-close.png";
-  import clickLogo from "./static/images/click-logo.png";
-  import SettingPop from "./components/SettingPop.svelte";
-  import { SvelteToast } from "@zerodevx/svelte-toast";
+  import clickClose from './static/images/click-close.png'
+  import clickLogo from './static/images/click-logo.png'
+  import SettingPop from './components/SettingPop.svelte'
+  import { SvelteToast } from '@zerodevx/svelte-toast'
   import {
     fullTrans,
     removeAllDom,
     changeNodeColor,
     getNodeLength,
-  } from "./utils/full_translate.js";
-  import { onMount } from "svelte";
-  let showPop = false;
-  let currTransType =
-    window.localStorage.getItem("webTranslateTransType") || "en2zh";
-
+  } from './utils/full_translate.js'
+  import { onMount } from 'svelte'
+  let showPop = false
+  let currTransType = window.localStorage.getItem('webTranslateTransType') || 'en2zh'
+  console.log('------------', process.env)
+  console.log('--')
   onMount(() => {
-    console.log("组件onMonut");
-  });
+    console.log('组件onMonut')
+  })
   // 点击其他区域隐藏弹窗
   document.body.addEventListener(
-    "click",
+    'click',
     function ({ target = {} }) {
       const has =
         target.className &&
-        target.className.split(" ") &&
-        target.className.split(" ").find((item) => item === "click-item");
-      if (!target.closest("#web-translate-svelte") && !has) {
-        showPop = false;
+        target.className.split(' ') &&
+        target.className.split(' ').find((item) => item === 'click-item')
+      if (!target.closest('#web-translate-svelte') && !has) {
+        showPop = false
       }
     },
     { passive: true }
-  );
+  )
 
   // 监听扩展icon的点击
-  chrome.runtime.onMessage.addListener(
-    async (request, sender, sendResponse) => {
-      const length = getNodeLength();
-      const urlKey = encodeURIComponent("hasTrans" + window.location.href);
-      if (length > 0 && window.sessionStorage.getItem(urlKey)) {
-        return;
-      }
-      window.sessionStorage.setItem(urlKey, 1);
-      const target = document.getElementById("web-translate-svelte").style;
-      if (target.display === "none") {
-        target.display = "block";
-      }
-      fullTrans({ transType: currTransType });
-      // sendResponse({ canTrans: true, msg: "开始翻译" });
+  chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+    const length = getNodeLength()
+    const urlKey = encodeURIComponent('hasTrans' + window.location.href)
+    if (length > 0 && window.sessionStorage.getItem(urlKey)) {
+      return
     }
-  );
+    window.sessionStorage.setItem(urlKey, 1)
+    const target = document.getElementById('web-translate-svelte').style
+    if (target.display === 'none') {
+      target.display = 'block'
+    }
+    fullTrans({ transType: currTransType })
+    // sendResponse({ canTrans: true, msg: "开始翻译" });
+  })
 
   function handleTranslate(data) {
-    const { type, color, transType } = data.detail;
-    const urlKey = encodeURIComponent("hasTrans" + window.location.href);
-    if (type === "重新翻译") {
+    const { type, color, transType } = data.detail
+    const urlKey = encodeURIComponent('hasTrans' + window.location.href)
+    if (type === '重新翻译') {
       if (transType !== currTransType) {
-        currTransType = transType;
-        window.localStorage.setItem("webTranslateTransType", transType);
-        window.sessionStorage.setItem(urlKey, 1);
-        removeAllDom();
-        fullTrans({ transType });
-        showPop = false;
-        return;
+        currTransType = transType
+        window.localStorage.setItem('webTranslateTransType', transType)
+        window.sessionStorage.setItem(urlKey, 1)
+        removeAllDom()
+        fullTrans({ transType })
+        showPop = false
+        return
       }
 
       if (!window.sessionStorage.getItem(urlKey)) {
-        window.sessionStorage.setItem(urlKey, 1);
-        removeAllDom();
-        fullTrans({ transType });
-        showPop = false;
-        return;
+        window.sessionStorage.setItem(urlKey, 1)
+        removeAllDom()
+        fullTrans({ transType })
+        showPop = false
+        return
       }
 
       if (getNodeLength() > 0) {
-        showPop = false;
-        return;
+        showPop = false
+        return
       }
 
-      window.sessionStorage.setItem(urlKey, 1);
-      fullTrans({ transType });
-      showPop = false;
-      return;
+      window.sessionStorage.setItem(urlKey, 1)
+      fullTrans({ transType })
+      showPop = false
+      return
     }
-    if (type === "不翻译了") {
-      window.sessionStorage.removeItem(urlKey);
-      showPop = false;
-      removeAllDom();
+    if (type === '不翻译了') {
+      window.sessionStorage.removeItem(urlKey)
+      showPop = false
+      removeAllDom()
     }
   }
 
   function changeColor(data) {
-    console.log(data.detail, "changeColor");
-    changeNodeColor({ color: data.detail });
+    console.log(data.detail, 'changeColor')
+    changeNodeColor({ color: data.detail })
   }
 </script>
 
 <main>
-  <div
-    class="container web-translate-svelte"
-    id="web-translate-svelte"
-    style="display:none"
-  >
+  <div class="container web-translate-svelte" id="web-translate-svelte" style="display:none">
     <div class="click-box" on:click={() => (showPop = !showPop)}>
       {#if showPop}
         <img src={clickClose} alt="close" class="click-item" />
@@ -108,14 +102,8 @@
         <img src={clickLogo} alt="logo" class="click-item" />
       {/if}
     </div>
-    <div
-      id="pop-box"
-      class={`transition-300 ${showPop ? "show-pop" : "hide-pop"}`}
-    >
-      <SettingPop
-        on:handleTranslate={handleTranslate}
-        on:changeColor={changeColor}
-      />
+    <div id="pop-box" class={`transition-300 ${showPop ? 'show-pop' : 'hide-pop'}`}>
+      <SettingPop on:handleTranslate={handleTranslate} on:changeColor={changeColor} />
     </div>
     <SvelteToast />
   </div>
