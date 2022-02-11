@@ -1,3 +1,4 @@
+import ignoreTag from '../static/data/ignoreTag.js'
 /**
  * 文本清洗（清除左右空格，所有换行，多余空格）
  * @param {String} str
@@ -167,8 +168,7 @@ export function filterDom({ element }) {
     return false
   }
 
-  const filterTagList = ['SCRIPT', 'CODE', 'NOSCRIPT', 'STYLE'] // 需要过滤的标签
-  if (filterTagList.includes(element.nodeName)) {
+  if (ignoreTag.includes(element.nodeName.toLowerCase())) {
     return false
   }
 
@@ -178,7 +178,7 @@ export function filterDom({ element }) {
   }
 
   const isChildNoTrans = Array.from(element.childNodes).every((item) =>
-    filterTagList.includes(item.nodeName)
+    ignoreTag.includes(item.nodeName.toLowerCase())
   ) // 子元素都是不需要翻译的
   if (isChildNoTrans) {
     return false

@@ -18,12 +18,9 @@ export const getNodeLength = () => {
  * @param {String} params.transType
  */
 export const fullTrans = async (params) => {
-  console.log('来自popup的数据', params, 'll')
   transType = params.transType || 'en2zh'
   nodeList = flattenNodes(document.body)
   textList = nodeList.map((item) => clearText(item.textContent))
-  console.log('nodeList', nodeList[0])
-  console.log('textList', textList)
   const { endIndex } = getListByLength({
     list: textList,
     length: transLength,
