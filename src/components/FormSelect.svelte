@@ -1,6 +1,5 @@
 <script>
-  import { createEventDispatcher } from "svelte";
-  
+  import { createEventDispatcher } from "svelte";  
   import iconDown from "../static/images/icon-down.png";
   const dispatch = createEventDispatcher();
   export let value = "en";

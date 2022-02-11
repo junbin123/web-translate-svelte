@@ -16,7 +16,7 @@ export default function SHA256(s) {
     return (x & y) ^ (~x & z)
   }
   function Maj(x, y, z) {
-    return (x & y) ^ (x & z) ^ (y & z) 
+    return (x & y) ^ (x & z) ^ (y & z)
   }
   function Sigma0256(x) {
     return S(x, 2) ^ S(x, 13) ^ S(x, 22)

@@ -1,5 +1,5 @@
 import { flattenNodes } from './common.js'
-import { toast } from '@zerodevx/svelte-toast'
+import { translateCaiYun } from '../request/index.js'
 let nodeList = [] // 要翻译的所有元素
 let textList = [] // 要翻译的所有文本列表
 let transIndex = 0 // 翻译到哪个index
@@ -148,34 +148,19 @@ function toChildElement(parent) {
  * @param {array} source 翻译内容
  * @param {string} transType 目标语言
  */
-async function requestCaiYun({ source = [], transType = 'en2zh' }) {
-  console.log('requestCaiYun--')
-  const url = 'https://api.interpreter.caiyunai.com/v1/translator'
-  const data = {
-    source,
-    trans_type: transType,
-    detect: true,
-  }
-  const params = {
-    headers: {
-      'content-type': 'application/json',
-      'x-authorization': 'token 输入彩云翻译token',
-    },
-    body: JSON.stringify(data),
-    method: 'POST',
-  }
-  try {
-    // const res = await fetch(url, params).then((data) => {
-    //   return data.json();
-    // });
-    const res = await transFunc({ source, transType })
-    console.log('彩云结果', res)
-    return res
-  } catch (err) {
-    console.log('彩云报错', err)
-    return err
-  }
-}
+// async function requestCaiYun({ source = [], transType = 'en2zh' }) {
+//   try {
+//     // const res = await fetch(url, params).then((data) => {
+//     //   return data.json();
+//     // });
+//     const res = await transFunc({ source, transType })
+//     console.log('彩云结果', res)
+//     return res
+//   } catch (err) {
+//     console.log('彩云报错', err)
+//     return err
+//   }
+// }
 
 /**
  * 判断dom是否出现在屏幕上（只支持竖向）
@@ -205,9 +190,7 @@ function judgeDomVisible(element) {
 
   return {
     relativeWindow,
-    isVisible: ['intersectTop', 'inside', 'intersectBottom'].includes(
-      relativeWindow
-    ),
+    isVisible: ['intersectTop', 'inside', 'intersectBottom'].includes(relativeWindow),
   }
 }
 
@@ -233,7 +216,7 @@ async function doTransProcess({ originDomList = [] }) {
   })
   console.log(1)
   try {
-    const { target } = await requestCaiYun({
+    const { target } = await translateCaiYun({
       source: originTextList,
       transType,
     })
@@ -285,24 +268,24 @@ export const changeNodeColor = ({ color }) => {
   })
 }
 
-function transFunc(data = {}) {
-  const promise = new Promise((resolve, reject) => {
-    const { source = ['hello world'], transType = 'auto2zh' } = data
-    chrome.runtime.sendMessage({ source, transType }, (response) => {
-      console.log('接收消息', { ...response })
-      if (response.code === -1) {
-        // alert(response.error_msg);
-        toast.push('response.error_msg', {
-          theme: {
-            '--toastBackground': '#F56565',
-            '--toastBarBackground': '#C53030',
-          },
-        })
-        reject(response)
-      } else {
-        resolve(response)
-      }
-    })
-  })
-  return promise
-}
+// function transFunc(data = {}) {
+//   const promise = new Promise((resolve, reject) => {
+//     const { source = ['hello world'], transType = 'auto2zh' } = data
+//     chrome.runtime.sendMessage({ source, transType }, (response) => {
+//       console.log('接收消息', { ...response })
+//       if (response.code === -1) {
+//         // alert(response.error_msg);
+//         toast.push('response.error_msg', {
+//           theme: {
+//             '--toastBackground': '#F56565',
+//             '--toastBarBackground': '#C53030',
+//           },
+//         })
+//         reject(response)
+//       } else {
+//         resolve(response)
+//       }
+//     })
+//   })
+//   return promise
+// }

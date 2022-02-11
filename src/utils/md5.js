@@ -15,7 +15,7 @@ export default function MD5(string) {
     }
     if (lX4 | lY4) {
       if (lResult & 0x40000000) {
-        return lResult ^ 0xc0000000 ^ lX8 ^ lY8 
+        return lResult ^ 0xc0000000 ^ lX8 ^ lY8
       } else {
         return lResult ^ 0x40000000 ^ lX8 ^ lY8
       }
