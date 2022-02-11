@@ -1,5 +1,4 @@
 import { baiduApi } from './request/translate/baidu'
-console.log('我是background.js22')
 // 监听活动tab
 // chrome.tabs.onActivated.addListener((tab) => {
 //   console.log("监听活动的tab:", tab);
