@@ -19,7 +19,6 @@
   let langValue = transType.split('2')
 
   onMount(() => {
-    console.log('组件onMonut')
     dispatch('changeColor', selectColor)
   })
 

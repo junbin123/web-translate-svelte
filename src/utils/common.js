@@ -155,10 +155,8 @@ export function flattenNodes(element) {
  * @return {boolean} true 要的 false 不要的
  */
 export function filterDom({ element }) {
-  console.log('dataset--------')
-  const dataset = element.dataset
-  console.log(dataset)
-
+  // const dataset = element.dataset
+  // console.log(dataset)
   const text = element.textContent.replace(/\s+/g, '')
   if (text.length < 4) {
     return false

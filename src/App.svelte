@@ -3,17 +3,13 @@
   import clickLogo from './static/images/click-logo.png'
   import SettingPop from './components/SettingPop.svelte'
   import { SvelteToast } from '@zerodevx/svelte-toast'
-  import {
-    fullTrans,
-    removeAllDom,
-    changeNodeColor,
-    getNodeLength,
-  } from './utils/fullTranslate.js'
+  import { fullTrans, removeAllDom, changeNodeColor, getNodeLength } from './utils/fullTranslate.js'
   import { onMount } from 'svelte'
+
   let showPop = false
   let currTransType = window.localStorage.getItem('webTranslateTransType') || 'en2zh'
   onMount(() => {
-    console.log('组件onMonut')
+    console.log('WebTranslate mounted')
   })
   // 点击其他区域隐藏弹窗
   document.body.addEventListener(
@@ -86,7 +82,6 @@
   }
 
   function changeColor(data) {
-    console.log(data.detail, 'changeColor')
     changeNodeColor({ color: data.detail })
   }
 </script>

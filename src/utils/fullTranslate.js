@@ -193,13 +193,11 @@ async function doTransProcess({ originDomList = [] }) {
     originTextList.push(text)
     transDomList.push(dom)
   })
-  console.log(1)
   try {
     const { target } = await translateCaiYun({
       source: originTextList,
       transType,
     })
-    console.log(2, target)
     if (!target || target.length === 0) {
       transDomList.forEach((item) => {
         removeDom(item)
@@ -212,7 +210,6 @@ async function doTransProcess({ originDomList = [] }) {
       item.style.backgroundColor = bgColor
     })
   } catch (err) {
-    console.log(err)
     transDomList.forEach((item) => {
       removeDom(item)
     })
@@ -240,7 +237,6 @@ export const removeAllDom = () => {
 }
 
 export const changeNodeColor = ({ color }) => {
-  console.log('changeNodeColor')
   bgColor = color
   targetNodeList.forEach((ele) => {
     ele.style.backgroundColor = color

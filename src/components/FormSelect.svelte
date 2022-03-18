@@ -37,7 +37,6 @@
   }
 
   function onMove() {
-    console.log('11')
     showList = !showList
   }
 </script>
