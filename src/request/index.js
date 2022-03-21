@@ -20,6 +20,13 @@ const showToast = {
   },
 }
 
+/**
+ * 彩云翻译接口
+ * @param {Object} params 原始翻译数据
+ * @param {Array<string>} params.source 原始文本
+ * @param {string} params.transType 翻译类型
+ * @returns {Promise<Object>}
+ */
 export const translateCaiYun = async (params) => {
   const url = 'https://api.interpreter.caiyunai.com/v1/translator'
   const data = {
