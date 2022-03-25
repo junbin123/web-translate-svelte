@@ -1,8 +1,8 @@
 import ignoreTag from '../static/data/ignoreTag.js'
 /**
  * 文本清洗（清除左右空格，所有换行，多余空格）
- * @param {String} str
- * @returns {String}
+ * @param {string} str
+ * @returns {string} 清洗后的文本
  */
 export const clearText = (str) => {
   const result = str
@@ -15,7 +15,7 @@ export const clearText = (str) => {
 /**
  * 节流函数
  * @param {function} fn 执行函数
- * @param {number} delay 间隔时间
+ * @param {number} delay 间隔时间(ms) 默认500ms
  */
 export const throttle = (fn, delay = 500) => {
   let timer = null
@@ -25,7 +25,7 @@ export const throttle = (fn, delay = 500) => {
     }
     timer = setTimeout(() => {
       fn.apply(this, arguments)
-      timer = null
+      clearTimeout(timer)
     }, delay)
   }
 }
