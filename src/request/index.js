@@ -46,9 +46,10 @@ export const translateCaiYun = async (params) => {
       .then((res) => {
         if (res.target) {
           resolve({ target: res.target })
+        } else {
+          showToast.error(res.message)
+          reject(res)
         }
-        showToast.error(res.message)
-        reject(res)
       })
       .catch((err) => {
         showToast.error(err.toString())
