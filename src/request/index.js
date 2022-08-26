@@ -34,6 +34,13 @@ export const translateCaiYun = async (params) => {
     trans_type: params.transType,
     detect: true,
   }
+
+  // 模拟请求
+  // const promise = new Promise((resolve, reject) => {
+  //   setTimeout(() => {
+  //     resolve({ target: params.source })
+  //   }, Math.ceil(Math.random() * 1000))
+  // })
   const promise = new Promise((resolve, reject) => {
     fetch(url, {
       method: 'POST',

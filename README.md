@@ -1,5 +1,19 @@
 # WebTranslate-网页翻译插件
 
+## 命令行
+
+```shell
+yarn
+
+# 执行
+yarn dev
+# 实时更新public文件
+# 将public导入浏览器
+
+
+yarn build
+```
+
 ## 技术栈
 
 - svelte
@@ -18,8 +32,6 @@
 ![WebTranslate](https://img-blog.csdnimg.cn/df779da96a7040749a6b17df775ceecb.png)
 
 ![WebTranslate](./images/preview.gif)
-
-
 
 可以优化的网页
 
