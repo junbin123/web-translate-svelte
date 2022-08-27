@@ -36,3 +36,10 @@ yarn build
 可以优化的网页
 
 https://www.producthunt.com/posts/plasma-finance
+
+
+接口请求发起有点长
+![image-20220827160635079](https://image.wujunbin.com/qiniu-1661587639902-image-20220827160635079.png)
+
+
+https://mp.weixin.qq.com/s/JR1FwBTLCJuUC7r2f-dOmw
