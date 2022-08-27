@@ -9,7 +9,15 @@ import image from '@rollup/plugin-image'
 const production = !process.env.ROLLUP_WATCH
 
 const pluginsConfig = [
-  production && terser(),
+  production && terser({
+    compress: {
+      // module: true,
+      // toplevel: true,
+      // unsafe_arrows: true,
+      drop_console: production,
+      drop_debugger: production,
+    },
+  }),
   svelte({
     compilerOptions: {
       dev: !production,

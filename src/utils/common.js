@@ -166,6 +166,13 @@ export function filterDom({ element }) {
     return false
   }
 
+
+
+  const hasTargetDom = Array.from(element.children).find(item => item.dataset.wts === 'transTarget')
+  if (hasTargetDom) {
+    return false
+  }
+
   if (ignoreTag.includes(element.nodeName.toLowerCase())) {
     return false
   }

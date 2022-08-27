@@ -1,5 +1,9 @@
 import { flattenNodes } from './common.js'
 import { translateCaiYun } from '../request/index.js'
+export let isOpenTrans = false // 是否开启翻译
+export function setIsOpenTrans(value) {
+  isOpenTrans = value
+}
 let nodeList = [] // 要翻译的所有元素
 let textList = [] // 要翻译的所有文本列表
 let transIndex = 0 // 翻译到哪个index
@@ -20,6 +24,20 @@ export const getNodeLength = () => {
 export const fullTrans = async (params) => {
   transType = params.transType || 'en2zh'
   nodeList = flattenNodes(document.body)
+  isLoading = true
+  filterActiveDom(nodeList).then(res => {
+    // console.log(1)
+    // console.log(res)
+    // const transTextList = res.map((item) => clearText(item.textContent))
+    return doTransProcess({ originDomList: res })
+  }).then(res => {
+    isLoading = false
+    console.log(res)
+  })
+
+
+  return
+  console.log(1)
   textList = nodeList.map((item) => clearText(item.textContent))
   const { endIndex } = getListByLength({
     list: textList,
@@ -38,7 +56,7 @@ export const fullTrans = async (params) => {
 }
 
 // 监听页面滚动
-window.addEventListener('scroll', throttle(windowScroll))
+window.addEventListener('scroll', debounce(windowScroll))
 
 // 从文本列表获取目标长度字符list(超出不要)
 function getListByLength({ list = [], length = 1000 }) {
@@ -69,30 +87,18 @@ function getListByLength({ list = [], length = 1000 }) {
  * @param {elemet} e
  */
 async function windowScroll() {
-  if (transIndex === 0 || transIndex === nodeList.length - 1 || isLoading) {
-    return
-  }
-  const dom = nodeList[transIndex + 1]
-  const { relativeWindow = '' } = judgeDomVisible(dom)
-  if (['intersectBottom', 'outsideBottom'].includes(relativeWindow)) {
+  console.log('滚动监听', { isLoading })
+  if (isLoading || !isOpenTrans) {
     return
   }
   isLoading = true
-  const nextTextList = textList.slice(transIndex + 1)
-  const { endIndex } = getListByLength({
-    list: nextTextList,
-    length: transLength,
+  const domList = flattenNodes(document.body)
+  filterActiveDom(domList).then(res => {
+    return doTransProcess({ originDomList: res })
+  }).then(res => {
+    console.log(res)
+    isLoading = false
   })
-  try {
-    const { transDomList } = await doTransProcess({
-      originDomList: nodeList.slice(transIndex + 1, transIndex + 2 + endIndex),
-    })
-    targetNodeList = [...targetNodeList, ...transDomList]
-    transIndex += endIndex + 1
-  } catch (err) {
-    console.log(err)
-  }
-  isLoading = false
 }
 
 /**
@@ -102,9 +108,9 @@ async function windowScroll() {
  */
 function addChildNode({ parentDom, childText }) {
   const childNode = document.createElement('font')
-  // childNode.dataset.webTranslate = 'translateTarget'
+  childNode.dataset.wts = 'transTarget' // 用于过滤，不翻译
   childNode.innerText = childText
-  childNode.setAttribute('class', 'content-class')
+  childNode.setAttribute('class', 'wts-target-animation')
   parentDom.appendChild(childNode)
   return childNode
 }
@@ -114,7 +120,7 @@ function addChildNode({ parentDom, childText }) {
  * @param {function} fn 执行函数
  * @param {number} delay 间隔时间
  */
-function throttle(fn, delay = 500) {
+function throttle(fn, delay = 200) {
   let timer = null
   return function () {
     if (timer) {
@@ -123,6 +129,24 @@ function throttle(fn, delay = 500) {
     timer = setTimeout(() => {
       fn.apply(this, arguments)
       timer = null
+    }, delay)
+  }
+}
+
+/**
+ * 防抖函数
+ * @param {function} fn 执行函数
+ * @param {number} delay 间隔时间
+ */
+function debounce(fn, delay = 200) {
+  let timer = null
+  return function () {
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      fn.apply(this, arguments)
+      clearTimeout(timer)
     }, delay)
   }
 }
@@ -184,7 +208,7 @@ function removeDom(ele) {
 async function doTransProcess({ originDomList = [] }) {
   isLoading = true
   console.log('doTransProcess', originDomList)
-  if (originDomList.length === 0) return []
+  if (originDomList.length === 0) return { transDomList: [] }
   const originTextList = [] // 没翻译的文本列表
   const transDomList = [] // 翻译好的dom
   originDomList.forEach((item) => {
@@ -206,7 +230,7 @@ async function doTransProcess({ originDomList = [] }) {
     }
     transDomList.forEach((item, index) => {
       item.innerText = target[index]
-      item.setAttribute('class', 'content-class-complete')
+      item.setAttribute('class', 'wts-target-complete')
       item.style.backgroundColor = bgColor
     })
   } catch (err) {
@@ -264,3 +288,31 @@ export const changeNodeColor = ({ color }) => {
 //   })
 //   return promise
 // }
+
+/**
+ * 过滤出显示在当前视口的dom
+ * @param {Array} domList dom列表
+ * @return {Promise} 过滤后的dom列表
+ */
+function filterActiveDom(domList) {
+  const filterList = Array.from(domList)
+  const options = {
+    root: document.querySelector('#viewport'),
+    rootMargin: '0px',
+    threshold: 1.0
+  }
+
+  const promise = new Promise(resolve => {
+    const observer = new IntersectionObserver(callback, options)
+    filterList.forEach((item) => {
+      observer.observe(item)
+    })
+    function callback(entries) {
+      console.log('执行callback')
+      const res = entries.filter(item => item.isIntersecting).map(item => item.target)
+      observer.disconnect()
+      resolve(res)
+    }
+  })
+  return promise
+}

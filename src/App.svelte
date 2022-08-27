@@ -3,7 +3,14 @@
   import clickLogo from './static/images/click-logo.png'
   import SettingPop from './components/SettingPop.svelte'
   import { SvelteToast } from '@zerodevx/svelte-toast'
-  import { fullTrans, removeAllDom, changeNodeColor, getNodeLength } from './utils/fullTranslate.js'
+  import {
+    fullTrans,
+    removeAllDom,
+    changeNodeColor,
+    getNodeLength,
+    isOpenTrans,
+    setIsOpenTrans,
+  } from './utils/fullTranslate.js'
   import { onMount } from 'svelte'
 
   let showPop = false
@@ -28,15 +35,19 @@
 
   // 监听扩展icon的点击
   chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+    setIsOpenTrans(true)
     const length = getNodeLength()
     const urlKey = encodeURIComponent('hasTrans' + window.location.href)
     if (length > 0 && window.sessionStorage.getItem(urlKey)) {
       return
     }
     window.sessionStorage.setItem(urlKey, 1)
-    const target = document.getElementById('web-translate-svelte').style
-    if (target.display === 'none') {
-      target.display = 'block'
+    const target = document.getElementById('web-translate-svelte')
+    console.log('1----------------')
+    console.log({ target })
+
+    if (target.style.display === 'none') {
+      target.style.display = 'block'
     }
     fullTrans({ transType: currTransType })
     // sendResponse({ canTrans: true, msg: "开始翻译" });
@@ -46,6 +57,7 @@
     const { type, color, transType } = data.detail
     const urlKey = encodeURIComponent('hasTrans' + window.location.href)
     if (type === '重新翻译') {
+      setIsOpenTrans(true)
       if (transType !== currTransType) {
         currTransType = transType
         window.localStorage.setItem('webTranslateTransType', transType)
@@ -75,6 +87,7 @@
       return
     }
     if (type === '不翻译了') {
+      setIsOpenTrans(false)
       window.sessionStorage.removeItem(urlKey)
       showPop = false
       removeAllDom()
