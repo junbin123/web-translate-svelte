@@ -7,8 +7,8 @@ yarn
 
 # 执行
 yarn dev
-# 实时更新public文件
-# 将public导入浏览器
+# 实时更新dist文件
+# 将dist导入浏览器
 
 
 yarn build
