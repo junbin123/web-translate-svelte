@@ -24,6 +24,7 @@
     "svelte-preprocess": "^4.6.9"
   },
   "dependencies": {
-    "franc-min": "^6.0.0"
+    "franc-min": "^6.0.0",
+    "tencentcloud-sdk-nodejs": "^4.0.438"
   }
 }

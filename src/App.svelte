@@ -3,6 +3,7 @@
   import clickLogo from './static/images/click-logo.png'
   import SettingPop from './components/SettingPop.svelte'
   import { SvelteToast } from '@zerodevx/svelte-toast'
+  import { getLanguageType } from './utils/common'
   import {
     fullTrans,
     removeAllDom,
@@ -12,6 +13,13 @@
     setIsOpenTrans,
   } from './utils/fullTranslate.js'
   import { onMount } from 'svelte'
+
+  const str = 'Node 12+ is needed to use it and it must be '
+
+  const a = getLanguageType(str)
+  console.log('wujunbin--------------------------------------------------')
+  console.log(str)
+  console.log(a)
 
   let showPop = false
   let currTransType = window.localStorage.getItem('webTranslateTransType') || 'en2zh'

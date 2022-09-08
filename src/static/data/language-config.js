@@ -169,4 +169,15 @@ export const francLanguageMap = {
   tha: 'th'
 }
 
+// 彩云小译的映射
+export const caiyunLanguageMap = {
+  en: 'en',
+  zh: 'zh-Hans',
+  ja: 'ja'
+}
+
+
+
+
+
 
