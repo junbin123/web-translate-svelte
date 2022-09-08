@@ -1,4 +1,6 @@
 import ignoreTag from '../static/data/ignoreTag.js'
+import { franc } from 'franc-min'
+import { languageDict, browserLanguageMap, francLanguageMap } from '../static/data/language-config.js'
 /**
  * 文本清洗（清除左右空格，所有换行，多余空格）
  * @param {string} str
@@ -189,4 +191,13 @@ export function filterDom({ element }) {
     return false
   }
   return true
+}
+
+export function getLanguageType(sourceStr) {
+  const sourcePre = franc(sourceStr)
+  const targetPre = navigator.language
+  return {
+    source: francLanguageMap[sourcePre] || '',
+    target: browserLanguageMap[targetPre] || '',
+  }
 }

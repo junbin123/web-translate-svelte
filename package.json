@@ -2,6 +2,7 @@
   "name": "web-translate-svelte",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "dev": "rollup -c rollup.config.js -w"
@@ -22,5 +23,7 @@
     "svelte": "^3.0.0",
     "svelte-preprocess": "^4.6.9"
   },
-  "dependencies": {}
+  "dependencies": {
+    "franc-min": "^6.0.0"
+  }
 }
