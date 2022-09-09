@@ -14,12 +14,7 @@
   } from './utils/fullTranslate.js'
   import { onMount } from 'svelte'
 
-  const str = 'Node 12+ is needed to use it and it must be '
-
-  const a = getLanguageType(str)
-  console.log('wujunbin--------------------------------------------------')
-  console.log(str)
-  console.log(a)
+  
 
   let showPop = false
   let currTransType = window.localStorage.getItem('webTranslateTransType') || 'en2zh'
@@ -44,16 +39,15 @@
   // 监听扩展icon的点击
   chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     setIsOpenTrans(true)
+    
     const length = getNodeLength()
     const urlKey = encodeURIComponent('hasTrans' + window.location.href)
     if (length > 0 && window.sessionStorage.getItem(urlKey)) {
       return
     }
     window.sessionStorage.setItem(urlKey, 1)
-    const target = document.getElementById('web-translate-svelte')
-    console.log('1----------------')
-    console.log({ target })
 
+    const target = document.getElementById('web-translate-svelte')
     if (target.style.display === 'none') {
       target.style.display = 'block'
     }

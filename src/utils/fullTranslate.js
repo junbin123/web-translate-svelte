@@ -1,16 +1,14 @@
-import { flattenNodes } from './common.js'
+import { flattenNodes, getLanguageType } from './common.js'
 import { translateCaiYun } from '../request/index.js'
 export let isOpenTrans = false // 是否开启翻译
 export function setIsOpenTrans(value) {
   isOpenTrans = value
 }
 let nodeList = [] // 要翻译的所有元素
-let textList = [] // 要翻译的所有文本列表
-let transIndex = 0 // 翻译到哪个index
 let targetNodeList = [] // 新增的元素
 let transType = 'en2zh' // 翻译方式
 let bgColor = ''
-const transLength = 3000 // 每次翻译的文本长度
+const transLength = 2000 // 每次翻译的文本长度
 let isLoading = false
 
 export const getNodeLength = () => {
@@ -26,61 +24,17 @@ export const fullTrans = async (params) => {
   nodeList = flattenNodes(document.body)
   isLoading = true
   filterActiveDom(nodeList).then(res => {
-    // console.log(1)
-    // console.log(res)
-    // const transTextList = res.map((item) => clearText(item.textContent))
     return doTransProcess({ originDomList: res })
   }).then(res => {
     isLoading = false
     console.log(res)
   })
-
-
-  return
-  console.log(1)
-  textList = nodeList.map((item) => clearText(item.textContent))
-  const { endIndex } = getListByLength({
-    list: textList,
-    length: transLength,
-  })
-  console.log({ endIndex })
-  try {
-    const { transDomList } = await doTransProcess({
-      originDomList: nodeList.slice(0, endIndex + 1),
-    })
-    targetNodeList = transDomList
-    transIndex = endIndex
-  } catch (err) {
-    console.log(err)
-  }
 }
 
 // 监听页面滚动
 window.addEventListener('scroll', debounce(windowScroll))
 
-// 从文本列表获取目标长度字符list(超出不要)
-function getListByLength({ list = [], length = 1000 }) {
-  console.log({ list, length })
-  let targetList = [] // 目标列表
-  let text = ''
-  let endIndex = 0 // 最后一个下标
-  for (const [index, item] of list.entries()) {
-    text += item
-    endIndex = index
-    if (text.length > length) {
-      endIndex = index - 1
-      targetList = list.slice(0, index)
-      break
-    }
-  }
-  if (endIndex === list.length - 1) {
-    targetList = list
-  }
-  return {
-    targetList,
-    endIndex,
-  }
-}
+
 
 /**
  * 页面滚动事件
@@ -217,6 +171,10 @@ async function doTransProcess({ originDomList = [] }) {
     originTextList.push(text)
     transDomList.push(dom)
   })
+
+  // const identifyResult = getLanguageType(originTextList.join(" "))
+  // console.log(identifyResult)
+
   try {
     const { target } = await translateCaiYun({
       source: originTextList,
@@ -256,7 +214,6 @@ export const removeAllDom = () => {
   targetNodeList.forEach((item) => {
     removeDom(item)
   })
-  transIndex = 0
   targetNodeList.length = 0
 }
 
@@ -315,4 +272,28 @@ function filterActiveDom(domList) {
     }
   })
   return promise
+}
+
+// 从文本列表获取目标长度字符list(超出不要)
+function getListByLength({ list = [], length = 1000 }) {
+  console.log({ list, length })
+  let targetList = [] // 目标列表
+  let text = ''
+  let endIndex = 0 // 最后一个下标
+  for (const [index, item] of list.entries()) {
+    text += item
+    endIndex = index
+    if (text.length > length) {
+      endIndex = index - 1
+      targetList = list.slice(0, index)
+      break
+    }
+  }
+  if (endIndex === list.length - 1) {
+    targetList = list
+  }
+  return {
+    targetList,
+    endIndex,
+  }
 }
