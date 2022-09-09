@@ -172,7 +172,8 @@ export const francLanguageMap = {
 // 彩云小译的映射
 export const caiyunLanguageMap = {
   en: 'en',
-  zh: 'zh-Hans',
+  'zh-Hans': 'zh',
+  'zh-Hant': 'zh',
   ja: 'ja'
 }
 

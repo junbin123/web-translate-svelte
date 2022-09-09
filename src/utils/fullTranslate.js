@@ -1,13 +1,21 @@
 import { flattenNodes, getLanguageType } from './common.js'
 import { translateCaiYun } from '../request/index.js'
+import { showToast } from './show-toast.js'
 export let isOpenTrans = false // 是否开启翻译
 export function setIsOpenTrans(value) {
   isOpenTrans = value
 }
 let nodeList = [] // 要翻译的所有元素
 let targetNodeList = [] // 新增的元素
-let transType = 'en2zh' // 翻译方式
+let transType = '' // 翻译方向
 let bgColor = ''
+
+let transDrection = { // 翻译方向
+  source: '',
+  target: ''
+}
+let targetDomList = [] // 正在进行翻译的dom
+
 const transLength = 2000 // 每次翻译的文本长度
 let isLoading = false
 
@@ -20,14 +28,30 @@ export const getNodeLength = () => {
  * @param {String} params.transType
  */
 export const fullTrans = async (params) => {
+  isLoading = true
   transType = params.transType || 'en2zh'
   nodeList = flattenNodes(document.body)
-  isLoading = true
   filterActiveDom(nodeList).then(res => {
-    return doTransProcess({ originDomList: res })
+
+    const { sourceTextList, targetDomList } = addTargetDom({ sourceDomList: res })
+    if (!transDrection.source) {
+      const { resultList } = getListByLength({ list: sourceTextList, length: 500 })
+      transDrection = getLanguageType(resultList.join(" ")) // {source: 'zh-Hans', target: 'zh-Hans'}
+      console.log("识别结果：", transDrection)
+    }
+    const { source, target } = transDrection
+    if (source === target && source) {
+      const msg = `${source} → ${target}，无需翻译`
+      showToast.error(msg)
+      return Promise.reject(msg)
+    }
+    return doTransProcess({ sourceTextList, targetDomList })
   }).then(res => {
-    isLoading = false
     console.log(res)
+    isLoading = false
+  }).catch(err => {
+    targetDomList.forEach((item) => removeDom(item))
+    isLoading = false
   })
 }
 
@@ -158,47 +182,36 @@ function removeDom(ele) {
   return res
 }
 
-// 执行翻译流程
-async function doTransProcess({ originDomList = [] }) {
-  isLoading = true
-  console.log('doTransProcess', originDomList)
-  if (originDomList.length === 0) return { transDomList: [] }
-  const originTextList = [] // 没翻译的文本列表
-  const transDomList = [] // 翻译好的dom
-  originDomList.forEach((item) => {
+// 添加翻译结果的dom
+function addTargetDom({ sourceDomList } = {}) {
+  if (sourceDomList.length === 0) return
+  const sourceTextList = [] // 没翻译的文本列表
+  targetDomList = [] // 翻译结果dom
+  sourceDomList.forEach((item) => {
     const text = clearText(item.textContent)
     const dom = addChildNode({ parentDom: item, childText: text })
-    originTextList.push(text)
-    transDomList.push(dom)
+    sourceTextList.push(text)
+    targetDomList.push(dom)
   })
+  return { sourceTextList, targetDomList }
+}
 
-  // const identifyResult = getLanguageType(originTextList.join(" "))
-  // console.log(identifyResult)
-
-  try {
-    const { target } = await translateCaiYun({
-      source: originTextList,
-      transType,
-    })
-    if (!target || target.length === 0) {
-      transDomList.forEach((item) => {
-        removeDom(item)
-      })
-      return { transDomList: [] }
-    }
-    transDomList.forEach((item, index) => {
-      item.innerText = target[index]
+// 执行翻译流程
+function doTransProcess({ sourceTextList, targetDomList }) {
+  // TODO:调整translateCaiYun
+  return translateCaiYun({
+    sourceTextList: sourceTextList,
+    ...transDrection
+  }).then(res => {
+    const { targetTextList } = res
+    targetDomList.forEach((item, index) => {
+      item.innerText = targetTextList[index]
       item.setAttribute('class', 'wts-target-complete')
       item.style.backgroundColor = bgColor
     })
-  } catch (err) {
-    transDomList.forEach((item) => {
-      removeDom(item)
-    })
-    return { transDomList: [] }
-  }
-  isLoading = false
-  return { transDomList }
+    isLoading = false
+    return res
+  })
 }
 
 // 纯函数：清理文本
@@ -276,8 +289,7 @@ function filterActiveDom(domList) {
 
 // 从文本列表获取目标长度字符list(超出不要)
 function getListByLength({ list = [], length = 1000 }) {
-  console.log({ list, length })
-  let targetList = [] // 目标列表
+  let resultList = [] // 目标列表
   let text = ''
   let endIndex = 0 // 最后一个下标
   for (const [index, item] of list.entries()) {
@@ -285,15 +297,15 @@ function getListByLength({ list = [], length = 1000 }) {
     endIndex = index
     if (text.length > length) {
       endIndex = index - 1
-      targetList = list.slice(0, index)
+      resultList = list.slice(0, index)
       break
     }
   }
   if (endIndex === list.length - 1) {
-    targetList = list
+    resultList = list
   }
   return {
-    targetList,
+    resultList,
     endIndex,
   }
 }

@@ -1,25 +1,9 @@
 import { caiYunToken, tencentSecret } from '../config.js'
 // import tencentcloud from "tencentcloud-sdk-nodejs"
-import { toast } from '@zerodevx/svelte-toast'
+import { showToast } from "../utils/show-toast.js"
+import { caiyunLanguageMap } from "../static/data/language-config"
 
-const showToast = {
-  success: (msg) => {
-    toast.push(msg, {
-      theme: {
-        '--toastBackground': '#F56565',
-        '--toastBarBackground': '#C53030',
-      },
-    })
-  },
-  error: (msg) => {
-    toast.push(msg, {
-      theme: {
-        '--toastBackground': '#F56565',
-        '--toastBarBackground': '#C53030',
-      },
-    })
-  },
-}
+
 
 /**
  * 彩云翻译接口
@@ -29,10 +13,14 @@ const showToast = {
  * @returns {Promise<Object>}
  */
 export async function translateCaiYun(params) {
+  const { sourceTextList, source, target } = params
+  console.log(params)
+  debugger
+  const transType = `${caiyunLanguageMap[source]}2${caiyunLanguageMap[target]}`
   const url = 'https://api.interpreter.caiyunai.com/v1/translator'
   const data = {
-    source: params.source,
-    trans_type: params.transType,
+    source: sourceTextList,
+    trans_type: transType,
     detect: true,
   }
 
@@ -53,7 +41,7 @@ export async function translateCaiYun(params) {
       .then((e) => e.json())
       .then((res) => {
         if (res.target) {
-          resolve({ target: res.target })
+          resolve({ targetTextList: res.target })
         } else {
           showToast.error(res.message)
           reject(res)
