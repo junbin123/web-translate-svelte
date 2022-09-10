@@ -14,8 +14,6 @@ import { caiyunLanguageMap } from "../static/data/language-config"
  */
 export async function translateCaiYun(params) {
   const { sourceTextList, source, target } = params
-  console.log(params)
-  debugger
   const transType = `${caiyunLanguageMap[source]}2${caiyunLanguageMap[target]}`
   const url = 'https://api.interpreter.caiyunai.com/v1/translator'
   const data = {
