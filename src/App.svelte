@@ -51,7 +51,7 @@
     if (target.style.display === 'none') {
       target.style.display = 'block'
     }
-    fullTrans({ transType: currTransType })
+    fullTrans()
     // sendResponse({ canTrans: true, msg: "开始翻译" });
   })
 

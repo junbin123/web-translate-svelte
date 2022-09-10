@@ -1,21 +1,18 @@
 import { flattenNodes, getLanguageType } from './common.js'
 import { translateCaiYun } from '../request/index.js'
 import { showToast } from './show-toast.js'
+
 export let isOpenTrans = false // 是否开启翻译
 export function setIsOpenTrans(value) {
   isOpenTrans = value
 }
-let nodeList = [] // 要翻译的所有元素
 let targetNodeList = [] // 新增的元素
-let transType = '' // 翻译方向
 let bgColor = ''
-
 let transDrection = { // 翻译方向
   source: '',
   target: ''
 }
 let targetDomList = [] // 正在进行翻译的dom
-
 const transLength = 2000 // 每次翻译的文本长度
 let isLoading = false
 
@@ -27,12 +24,10 @@ export const getNodeLength = () => {
  * 全文翻译方法
  * @param {String} params.transType
  */
-export const fullTrans = async (params) => {
+export function fullTrans() {
   isLoading = true
-  transType = params.transType || 'en2zh'
-  nodeList = flattenNodes(document.body)
-  filterActiveDom(nodeList).then(res => {
-
+  const flatDomList = flattenNodes(document.body)
+  filterActiveDom(flatDomList).then(res => {
     const { sourceTextList, targetDomList } = addTargetDom({ sourceDomList: res })
     if (!transDrection.source) {
       const { resultList } = getListByLength({ list: sourceTextList, length: 500 })
@@ -62,21 +57,12 @@ window.addEventListener('scroll', debounce(windowScroll))
 
 /**
  * 页面滚动事件
- * @param {elemet} e
  */
-async function windowScroll() {
-  console.log('滚动监听', { isLoading })
+function windowScroll() {
   if (isLoading || !isOpenTrans) {
     return
   }
-  isLoading = true
-  const domList = flattenNodes(document.body)
-  filterActiveDom(domList).then(res => {
-    return doTransProcess({ originDomList: res })
-  }).then(res => {
-    console.log(res)
-    isLoading = false
-  })
+  fullTrans()
 }
 
 /**
@@ -237,27 +223,7 @@ export const changeNodeColor = ({ color }) => {
   })
 }
 
-// function transFunc(data = {}) {
-//   const promise = new Promise((resolve, reject) => {
-//     const { source = ['hello world'], transType = 'auto2zh' } = data
-//     chrome.runtime.sendMessage({ source, transType }, (response) => {
-//       console.log('接收消息', { ...response })
-//       if (response.code === -1) {
-//         // alert(response.error_msg);
-//         toast.push('response.error_msg', {
-//           theme: {
-//             '--toastBackground': '#F56565',
-//             '--toastBarBackground': '#C53030',
-//           },
-//         })
-//         reject(response)
-//       } else {
-//         resolve(response)
-//       }
-//     })
-//   })
-//   return promise
-// }
+
 
 /**
  * 过滤出显示在当前视口的dom

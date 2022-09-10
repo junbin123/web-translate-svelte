@@ -123,7 +123,6 @@ export const getBrowserInfo = () => {
  * @returns {Array} result
  */
 export function flattenNodes(element) {
-  // alert(1)
   const result = []
   recursiveNodes(element)
   // 递归dom
