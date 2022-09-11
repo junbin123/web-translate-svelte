@@ -12,7 +12,7 @@ import { caiyunLanguageMap } from "../static/data/language-config"
  * @param {string} params.transType 翻译类型
  * @returns {Promise<Object>}
  */
-export async function translateCaiYun(params) {
+export function translateCaiYun(params) {
   const { sourceTextList, source, target } = params
   const transType = `${caiyunLanguageMap[source]}2${caiyunLanguageMap[target]}`
   const url = 'https://api.interpreter.caiyunai.com/v1/translator'
@@ -25,9 +25,10 @@ export async function translateCaiYun(params) {
   // 模拟请求
   // const promise = new Promise((resolve, reject) => {
   //   setTimeout(() => {
-  //     resolve({ target: params.source })
-  //   }, 5000)
+  //     resolve({ targetTextList: sourceTextList })
+  //   }, 1000)
   // })
+
   const promise = new Promise((resolve, reject) => {
     fetch(url, {
       method: 'POST',

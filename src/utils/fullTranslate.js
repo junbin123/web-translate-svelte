@@ -163,9 +163,10 @@ function judgeDomVisible(element) {
 
 // 删除dom
 function removeDom(ele) {
-  const parent = ele.parentElement
-  const res = parent.removeChild(ele)
-  return res
+  // const parent = ele.parentElement
+  // const res = parent.removeChild(ele)
+  // return res
+  ele = null
 }
 
 // 添加翻译结果的dom
