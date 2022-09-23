@@ -43,3 +43,6 @@ https://www.producthunt.com/posts/plasma-finance
 
 
 https://mp.weixin.qq.com/s/JR1FwBTLCJuUC7r2f-dOmw
+
+<!-- 原始语言识别不准，需要开发手动修改功能 -->
+https://play.google.com/store/search?q=badminton&c=apps

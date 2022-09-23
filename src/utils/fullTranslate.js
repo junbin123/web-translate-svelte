@@ -32,6 +32,7 @@ export function fullTrans() {
     if (!transDrection.source) {
       const { resultList } = getListByLength({ list: sourceTextList, length: 500 })
       transDrection = getLanguageType(resultList.join(" ")) // {source: 'zh-Hans', target: 'zh-Hans'}
+      console.log('喂养数据：', resultList.join(" "))
       console.log("识别结果：", transDrection)
     }
     const { source, target } = transDrection
@@ -51,7 +52,7 @@ export function fullTrans() {
 }
 
 // 监听页面滚动
-window.addEventListener('scroll', debounce(windowScroll))
+window.addEventListener('mousewheel', debounce(windowScroll))
 
 
 
@@ -59,6 +60,7 @@ window.addEventListener('scroll', debounce(windowScroll))
  * 页面滚动事件
  */
 function windowScroll() {
+  console.log('页面滚动-windowScroll')
   if (isLoading || !isOpenTrans) {
     return
   }
