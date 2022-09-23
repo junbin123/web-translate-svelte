@@ -32,6 +32,7 @@ export function fullTrans() {
     if (!transDrection.source) {
       const { resultList } = getListByLength({ list: sourceTextList, length: 500 })
       transDrection = getLanguageType(resultList.join(" ")) // {source: 'zh-Hans', target: 'zh-Hans'}
+      console.log('喂养数据：', resultList.join(" "))
       console.log("识别结果：", transDrection)
     }
     const { source, target } = transDrection
